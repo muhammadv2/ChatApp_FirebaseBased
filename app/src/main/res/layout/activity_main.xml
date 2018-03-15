@@ -7,9 +7,9 @@
     tools:context="com.muhammadv2.pm_me.MainActivity">
 
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_messages_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/rv_messages_container"
         android:layout_marginBottom="24dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
@@ -26,22 +26,24 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:gravity="center"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btn_select_image"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#0000"
             android:contentDescription="@string/add_image"
             android:src="@drawable/ic_image_black_24dp" />
 
         <EditText
             android:id="@+id/et_user_input"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_weight="1"

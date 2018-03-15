@@ -12,6 +12,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -21,22 +24,25 @@ public class MainActivity extends AppCompatActivity {
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
 
     @BindView(R.id.rv_messages_container)
-    private RecyclerView mMessageListView;
+    RecyclerView mMessageListView;
 
-    private MessageAdapter mMessageAdapter;
+    MessageAdapter mMessageAdapter;
 
     @BindView(R.id.btn_select_image)
-    private ImageButton mPhotoPickerButton;
+    ImageButton mPhotoPickerButton;
 
     @BindView(R.id.et_user_input)
-    private EditText mMessageEditText;
+    EditText mMessageEditText;
 
     @BindView(R.id.btn_send_msg)
-    private Button mSendButton;
+    Button mSendButton;
+
+    private FirebaseDatabase mFireBaseDb;
+    private DatabaseReference mMessageDbRef;
 
     private ProgressBar mProgressBar;
 
-    private String mUsername;
+    private String mUsername = "No One";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +54,18 @@ public class MainActivity extends AppCompatActivity {
         // Set some restrictions over the user input
         editTextWatcher();
 
+        // Instantiating Fb database entry and creating a child named messages in th db.
+        mFireBaseDb = FirebaseDatabase.getInstance();
+        mMessageDbRef = mFireBaseDb.getReference().child("messages");
+
 
         // Send button sends a message and clears the EditText
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: Send messages on click
+
+                Message message = new Message(mUsername, mMessageEditText.getText().toString(), null);
+                mMessageDbRef.push().setValue(message);
 
                 // Clear input box
                 mMessageEditText.setText("");

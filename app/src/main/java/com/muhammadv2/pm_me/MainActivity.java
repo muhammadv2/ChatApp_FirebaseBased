@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference mMessageDbRef;
     private ChildEventListener mChildListener;
 
-    private List<Message> messageList;
+    private List<Message> messageList; // List to hold all the messages retrieved from the db
 
 
     private ProgressBar mProgressBar;
@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         mFireBaseDb = FirebaseDatabase.getInstance();
         mMessageDbRef = mFireBaseDb.getReference().child("messages");
 
-        instantiateRecyclerView();
+        instantiateRecyclerView(); //Just setting set has fixed size and the layoutManager on RV
 
         messageList = new ArrayList<>();
 
@@ -77,14 +77,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                // Populate message model with the input from the user
                 Message message =
-                        new Message(mUsername, mMessageEditText.getText().toString(), null);
+                        new Message(mUsername,
+                                mMessageEditText.getText().toString().trim(),
+                                null);
+
+                // .push() method used to write to the fb db setting the value on messages node
                 mMessageDbRef.push().setValue(message);
 
                 // Clear input box
                 mMessageEditText.setText("");
             }
         });
+
+        // Instantiating listener over the db to listen if there any data has been changed
         mChildListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -95,27 +102,32 @@ public class MainActivity extends AppCompatActivity {
             //region unused
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                //Todo called if the data already in the db has been changed
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+                //Todo called when the db data has been deleted
             }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                //Todo called when the data has been moved to another node (json object in db)
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                //Todo Called when there's an error most of the time there's no authentication
             }
             //endregion
         };
+        // Attaching the listener to the node Ref
         mMessageDbRef.addChildEventListener(mChildListener);
 
-
+        // Send the list of the messages to the adapter and populate the recycler view
         mMessageAdapter = new MessageAdapter(messageList);
         mMessageRv.setAdapter(mMessageAdapter);
-
 
     }
 

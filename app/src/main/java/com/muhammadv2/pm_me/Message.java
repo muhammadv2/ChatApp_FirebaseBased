@@ -7,6 +7,9 @@ public class Message {
     private String messageBody;
     private String imageUrl;
 
+    public Message() {
+    }
+
     public Message(String senderName, String messageBody, String imageUrl) {
         this.senderName = senderName;
         this.messageBody = messageBody;

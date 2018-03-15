@@ -2,6 +2,7 @@ package com.muhammadv2.pm_me;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -12,19 +13,24 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String ANONYMOUS = "anonymous";
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
 
     @BindView(R.id.rv_messages_container)
-    RecyclerView mMessageListView;
+    RecyclerView mMessageRv;
 
     MessageAdapter mMessageAdapter;
 
@@ -39,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseDatabase mFireBaseDb;
     private DatabaseReference mMessageDbRef;
+    private ChildEventListener mChildListener;
+
+    private List<Message> messageList;
+
 
     private ProgressBar mProgressBar;
 
@@ -58,19 +68,60 @@ public class MainActivity extends AppCompatActivity {
         mFireBaseDb = FirebaseDatabase.getInstance();
         mMessageDbRef = mFireBaseDb.getReference().child("messages");
 
+        instantiateRecyclerView();
+
+        messageList = new ArrayList<>();
 
         // Send button sends a message and clears the EditText
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                Message message = new Message(mUsername, mMessageEditText.getText().toString(), null);
+                Message message =
+                        new Message(mUsername, mMessageEditText.getText().toString(), null);
                 mMessageDbRef.push().setValue(message);
 
                 // Clear input box
                 mMessageEditText.setText("");
             }
         });
+        mChildListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+                messageList.add(dataSnapshot.getValue(Message.class));
+            }
+
+            //region unused
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+            //endregion
+        };
+        mMessageDbRef.addChildEventListener(mChildListener);
+
+
+        mMessageAdapter = new MessageAdapter(messageList);
+        mMessageRv.setAdapter(mMessageAdapter);
+
+
+    }
+
+    private void instantiateRecyclerView() {
+        mMessageRv.setHasFixedSize(true);
+        mMessageRv.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void editTextWatcher() {

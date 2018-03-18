@@ -18,14 +18,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     private List<Message> mMessagesList;
 
-    public MessageAdapter(List<Message> messagesList) {
+    MessageAdapter(List<Message> messagesList) {
         mMessagesList = messagesList;
     }
 
     @NonNull
     @Override
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.cv_message, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).
+                inflate(R.layout.cv_message, parent, false);
         return new MessageViewHolder(view);
     }
 
@@ -42,6 +43,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public int getItemCount() {
         if (mMessagesList == null) return 0;
         return mMessagesList.size();
+    }
+
+    public void clear() {
+        if (mMessagesList == null) return;
+        final int size = mMessagesList.size();
+        mMessagesList.clear();
+        notifyItemRangeRemoved(0, size);
     }
 
     class MessageViewHolder extends RecyclerView.ViewHolder {

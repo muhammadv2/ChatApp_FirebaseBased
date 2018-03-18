@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                                 mMessageEditText.getText().toString().trim(), // Message body
                                 null);
 
-                // .push() method used to write to the fb db setting the value on messages node
+                // .push() method used to write to the fb db putting the value on messages node
                 mMessageDbRef.push().setValue(message);
 
                 // Clear input box
@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
                             AuthUI.getInstance()
                                     .createSignInIntentBuilder()
                                     .setIsSmartLockEnabled(false)
+                                    .setLogo(R.drawable.app_icon)
                                     .setAvailableProviders(Arrays.asList(
                                             new AuthUI.IdpConfig.EmailBuilder().build(),
                                             new AuthUI.IdpConfig.GoogleBuilder().build()
@@ -278,7 +279,6 @@ public class MainActivity extends AppCompatActivity {
             case R.id.sign_out_btn:
                 AuthUI.getInstance().signOut(this); // Sign out function as simple as that
         }
-
         return super.onOptionsItemSelected(item);
     }
 }

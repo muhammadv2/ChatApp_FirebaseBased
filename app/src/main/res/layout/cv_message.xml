@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/dp_8"
-    android:layout_marginStart="@dimen/dp_4"
     android:layout_marginEnd="@dimen/dp_4"
+    android:layout_marginStart="@dimen/dp_4"
     android:background="@android:color/white"
     android:orientation="vertical">
 
@@ -13,6 +13,7 @@
         android:id="@+id/photoImageView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:adjustViewBounds="true"
         android:contentDescription="@string/image" />
 
@@ -35,5 +36,5 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/darker_gray"/>
+        android:background="@android:color/darker_gray" />
 </LinearLayout>

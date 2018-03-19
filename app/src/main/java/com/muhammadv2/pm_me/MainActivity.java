@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
     private static final int RC_SIGN_IN = 305;
     private static final String ANONYMOUS = "Not assigned";
+    private static final int RC_PHOTO_PICKER = 909;
 
     @BindView(R.id.rv_messages_container)
     RecyclerView mMessageRv;
@@ -106,17 +107,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/jpeg");
+                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                startActivityForResult(Intent.createChooser
+                        (intent, "Complete action using"), RC_PHOTO_PICKER);
+            }
+        });
+
         // Auth listener override method called when the auth change means the user logged in or not
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) { // User authorized
-                    Toast.makeText(MainActivity.this,
-                            "You're logged in successfully",
-                            Toast.LENGTH_LONG).show();
-
-                    //name to be displayed on the UI and attach the listener to receive the data
+                    // Name to be displayed on the UI and attach the listener to receive the data
                     onSignedInInitialize(user.getDisplayName());
                 } else { // User not authorized
                     // Do clear the adapter and detach the listener if the user not logged in

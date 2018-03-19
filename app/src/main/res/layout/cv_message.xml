@@ -15,7 +15,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:adjustViewBounds="true"
-        android:contentDescription="@string/image" />
+        android:contentDescription="@string/image"
+        android:maxHeight="@dimen/dp_360" />
 
     <TextView
         android:id="@+id/messageTextView"

@@ -1,6 +1,7 @@
 package com.muhammadv2.pm_me;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +21,8 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -27,6 +30,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +41,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -62,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
     private ChildEventListener mChildListener;
     private FirebaseAuth mFbAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseStorage mFirebaseStorage;
+    private StorageReference mStorageRef;
 
     private List<Message> messageList; // List to hold all the messages retrieved from the db
 
@@ -81,8 +91,11 @@ public class MainActivity extends AppCompatActivity {
 
         // Instantiating Fb database entry and creating a child named messages in th db.
         mFireBaseDb = FirebaseDatabase.getInstance();
-        mMessageDbRef = mFireBaseDb.getReference().child("messages");
         mFbAuth = FirebaseAuth.getInstance();
+        mFirebaseStorage = FirebaseStorage.getInstance();
+
+        mMessageDbRef = mFireBaseDb.getReference().child("messages");
+        mStorageRef = mFirebaseStorage.getReference().child("chat_photos");
 
         instantiateRecyclerView(); //Just setting set has fixed size and the layoutManager on RV
 
@@ -107,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Image picker button send an intent to open photos associated apps
         mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -167,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
 
                     messageList.add(dataSnapshot.getValue(Message.class));
                     // Send the list of the messages to the adapter and populate the recycler view
-                    mMessageAdapter = new MessageAdapter(messageList);
+                    mMessageAdapter = new MessageAdapter(MainActivity.this, messageList);
                     mMessageRv.setAdapter(mMessageAdapter);
                 }
 
@@ -209,6 +223,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
                 // Sign-in succeeded, set up the UI
@@ -217,6 +232,23 @@ public class MainActivity extends AppCompatActivity {
                 // Sign in was canceled by the user, finish the activity
                 Toast.makeText(this, "Sign in canceled", Toast.LENGTH_SHORT).show();
                 finish();
+            }
+        } else if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
+            // We now have an image get its uri and then send it to the storage
+            Uri selectedImage = data.getData();
+            if (selectedImage != null) {
+                StorageReference photoRef = mStorageRef.child(selectedImage.getLastPathSegment());
+                UploadTask uploadTask = photoRef.putFile(selectedImage);
+                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        if (taskSnapshot.getDownloadUrl() == null) return;
+                        // The photo uploaded successfully get its url and push it to the db
+                        String mImageUri = taskSnapshot.getDownloadUrl().toString();
+                        Message message = new Message(mUsername, null, mImageUri);
+                        mMessageDbRef.push().setValue(message);
+                    }
+                });
             }
         }
 

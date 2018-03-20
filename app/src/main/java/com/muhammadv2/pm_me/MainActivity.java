@@ -215,9 +215,10 @@ public class MainActivity extends AppCompatActivity {
     private void detachDatabaseListener() {
         if (mChildListener != null) {
             mMessageDbRef.removeEventListener(mChildListener);
-            mMessageAdapter.clear();
             mChildListener = null;
         }
+            if (mMessageAdapter != null)
+                mMessageAdapter.clear();
     }
 
     @Override
@@ -251,7 +252,6 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         }
-
     }
 
     @Override

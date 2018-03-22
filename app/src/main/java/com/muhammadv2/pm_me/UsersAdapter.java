@@ -35,8 +35,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         AuthUser user = mAuthUsers.get(position);
 
         holder.userName.setText(user.getName());
-
-
     }
 
     @Override
@@ -45,9 +43,16 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         return mAuthUsers.size();
     }
 
+    public void clear() {
+        if (mAuthUsers == null) return;
+        final int size = mAuthUsers.size();
+        mAuthUsers.clear();
+        notifyItemRangeRemoved(0, size);
+    }
+
     class UserViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.tv_username)
+        @BindView(R.id.tv_user_name)
         TextView userName;
         @BindView(R.id.iv_user_image)
         ImageView userImage;

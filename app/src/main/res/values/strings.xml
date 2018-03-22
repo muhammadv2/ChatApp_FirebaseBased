@@ -6,4 +6,6 @@
     <string name="image">image</string>
     <string name="sign_out">Sign out</string>
     <string name="upload_failed">Upload failed, please re-upload</string>
+    <string name="user_name">User name</string>
+    <string name="user_image">User image</string>
 </resources>

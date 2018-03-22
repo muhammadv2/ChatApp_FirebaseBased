@@ -21,7 +21,6 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,7 +30,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -41,9 +39,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity {
+public class ChatDetailsActivity extends AppCompatActivity {
 
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
     private static final int RC_SIGN_IN = 305;
@@ -75,14 +72,12 @@ public class MainActivity extends AppCompatActivity {
 
     private List<Message> messageList; // List to hold all the messages retrieved from the db
 
-    private ProgressBar mProgressBar;
-
     private String mUsername = ANONYMOUS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_chat_details);
 
         ButterKnife.bind(this);
 
@@ -181,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
 
                     messageList.add(dataSnapshot.getValue(Message.class));
                     // Send the list of the messages to the adapter and populate the recycler view
-                    mMessageAdapter = new MessageAdapter(MainActivity.this, messageList);
+                    mMessageAdapter = new MessageAdapter(ChatDetailsActivity.this, messageList);
                     mMessageRv.setAdapter(mMessageAdapter);
                 }
 

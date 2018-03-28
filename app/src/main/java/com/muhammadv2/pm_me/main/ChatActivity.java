@@ -30,7 +30,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-//Todo(1)  Ensure that you only add unique id keys to the database so the user data stored once
 //Todo(2)  Fix the problem that the list of users most of time be empty
 //Todo(3)  Re-handle the flow of the methods inside of onCreate ensure not to call unnecessary methods
 public class ChatActivity extends AppCompatActivity {
@@ -59,6 +58,7 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         ButterKnife.bind(this);
+
         Timber.plant(new Timber.DebugTree());
 
         mAuthUsers = new ArrayList<>();
@@ -68,20 +68,17 @@ public class ChatActivity extends AppCompatActivity {
 
         mFbAuth = FirebaseAuth.getInstance();
 
-        // Auth listener override method called when the auth change means the user logged in or not
+        // Listener for Authentication changes
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) { // User authorized
-                    Timber.d("User is authorized " + user.getUid());
                     addTheUserDataToDb(user);
-
-                    // Name to be displayed on the UI and attach the listener to receive the data
-                    mUsername = user.getDisplayName();
                     loadAllAuthUsers();
+
+                    mUsername = user.getDisplayName();
                 } else { // User not authorized
-                    // Do clear the adapter and detach the listener if the user not logged in
                     onSignedOutCleaner();
 
                     // Start the Firebase UI for logging in by email and google provider
@@ -102,23 +99,10 @@ public class ChatActivity extends AppCompatActivity {
         };
     }
 
-    private void loadAllAuthUsers() {
-
-        mUsersReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                AuthUser userId = dataSnapshot.getValue(AuthUser.class);
-                Timber.d(userId + " name of the user ");
-                mAuthUsers.add(userId);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
+    /**
+     * @param authUser we extract the user info as user id and name and then populate the AuthUser
+     *                 Object and send it to the database
+     */
     private void addTheUserDataToDb(FirebaseUser authUser) {
         String userId = authUser.getUid();
         String userName = authUser.getDisplayName();
@@ -128,12 +112,45 @@ public class ChatActivity extends AppCompatActivity {
         }
         AuthUser user = new AuthUser(userName, userPhotoUrl);
 
+        // To uniquely store the user once with no duplication , Store the user unique id as a key
+        // in the node then store the name and the location of the image url as values to this key
+        //  /"users"-
+        //           |- "userId"-
+        //                       |- "userName"
+        //                       |- "imageUrl"
         mUsersReference.child(userId).setValue(user);
+    }
+
+    /**
+     * Extract all the users stored in the database to show them as a list
+     */
+    private void loadAllAuthUsers() {
+        initializeRecycler();
+
+        mUsersReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    AuthUser authUser = ds.getValue(AuthUser.class);
+                    mAuthUsers.add(authUser);
+                }
+                mUsersAdapter = new UsersAdapter(mAuthUsers);
+                mUsersRV.setAdapter(mUsersAdapter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(ChatActivity.this, R.string.error_load_users,
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     private void onSignedOutCleaner() {
         mUsername = ANONYMOUS;
-//        detachDatabaseListener();
+        detachDatabaseListener();
     }
 
     private void detachDatabaseListener() {
@@ -177,8 +194,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onPause();
         if (mFbAuth != null)
             mFbAuth.removeAuthStateListener(mAuthListener);
-        if (mUsersAdapter != null)
-            mUsersAdapter.clear();
+        detachDatabaseListener();
     }
 
     @Override

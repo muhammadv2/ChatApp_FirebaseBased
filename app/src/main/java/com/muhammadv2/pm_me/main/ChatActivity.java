@@ -30,15 +30,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-//Todo(2)  Fix the problem that the list of users most of time be empty
-//Todo(3)  Re-handle the flow of the methods inside of onCreate ensure not to call unnecessary methods
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnItemClickLister {
 
     private static final int RC_SIGN_IN = 305;
+    private static final String mUsersNode = "users";
     private static final String ANONYMOUS = "ANONYMOUS";
     private String mUsername = ANONYMOUS;
-
-    private static final String mUsersNode = "users";
 
     // Firebase instances
     private FirebaseDatabase mFireBaseDb;
@@ -125,7 +122,6 @@ public class ChatActivity extends AppCompatActivity {
      * Extract all the users stored in the database to show them as a list
      */
     private void loadAllAuthUsers() {
-        initializeRecycler();
 
         mUsersReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -135,8 +131,7 @@ public class ChatActivity extends AppCompatActivity {
                     AuthUser authUser = ds.getValue(AuthUser.class);
                     mAuthUsers.add(authUser);
                 }
-                mUsersAdapter = new UsersAdapter(mAuthUsers);
-                mUsersRV.setAdapter(mUsersAdapter);
+                initializeRecycler();
             }
 
             @Override
@@ -181,6 +176,8 @@ public class ChatActivity extends AppCompatActivity {
     private void initializeRecycler() {
         mUsersRV.setHasFixedSize(true);
         mUsersRV.setLayoutManager(new LinearLayoutManager(this));
+        mUsersAdapter = new UsersAdapter(mAuthUsers, this);
+        mUsersRV.setAdapter(mUsersAdapter);
     }
 
     @Override
@@ -213,5 +210,10 @@ public class ChatActivity extends AppCompatActivity {
                 AuthUI.getInstance().signOut(this); // Sign out function as simple as that
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(int position) {
+        Timber.d("position " + position);
     }
 }

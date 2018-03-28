@@ -8,20 +8,30 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.muhammadv2.pm_me.R;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
 
     private List<AuthUser> mAuthUsers;
 
-    UsersAdapter(List<AuthUser> authUsers) {
+    private OnItemClickLister mOnItemClickLister;
+
+    @FunctionalInterface
+    interface OnItemClickLister {
+        void onClick(int position);
+    }
+
+    UsersAdapter(List<AuthUser> authUsers, OnItemClickLister onItemClickLister) {
         mAuthUsers = authUsers;
+        mOnItemClickLister = onItemClickLister;
     }
 
     @NonNull
@@ -36,6 +46,9 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         AuthUser user = mAuthUsers.get(position);
 
+        Glide.with(holder.userImage.getContext())
+                .load(user.getImageUrl())
+                .into(holder.userImage);
         holder.userName.setText(user.getName());
     }
 
@@ -52,7 +65,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         notifyItemRangeRemoved(0, size);
     }
 
-    class UserViewHolder extends RecyclerView.ViewHolder {
+    class UserViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         @BindView(R.id.tv_user_name)
         TextView userName;
@@ -62,6 +75,12 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         UserViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            mOnItemClickLister.onClick(getAdapterPosition());
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me;
+package com.muhammadv2.pm_me.main;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.muhammadv2.pm_me.R;
 
 import java.util.List;
 
@@ -18,7 +20,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
     private List<AuthUser> mAuthUsers;
 
-    public UsersAdapter(List<AuthUser> authUsers) {
+    UsersAdapter(List<AuthUser> authUsers) {
         mAuthUsers = authUsers;
     }
 

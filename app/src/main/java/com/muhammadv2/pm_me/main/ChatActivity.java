@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me;
+package com.muhammadv2.pm_me.main;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -7,11 +7,11 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.auth.api.Auth;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -19,6 +19,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.muhammadv2.pm_me.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,16 +30,20 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
+//Todo(1)  Ensure that you only add unique id keys to the database so the user data stored once
+//Todo(2)  Fix the problem that the list of users most of time be empty
+//Todo(3)  Re-handle the flow of the methods inside of onCreate ensure not to call unnecessary methods
 public class ChatActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 305;
-    private static final String ANONYMOUS = "Not assigned";
+    private static final String ANONYMOUS = "ANONYMOUS";
     private String mUsername = ANONYMOUS;
+
+    private static final String mUsersNode = "users";
 
     // Firebase instances
     private FirebaseDatabase mFireBaseDb;
-    private DatabaseReference mUsersIdReference;
-    private ChildEventListener mUsersListener;
+    private DatabaseReference mUsersReference;
     private FirebaseAuth mFbAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -58,7 +64,7 @@ public class ChatActivity extends AppCompatActivity {
         mAuthUsers = new ArrayList<>();
 
         mFireBaseDb = FirebaseDatabase.getInstance();
-        mUsersIdReference = mFireBaseDb.getReference().child("users");
+        mUsersReference = mFireBaseDb.getReference().child(mUsersNode);
 
         mFbAuth = FirebaseAuth.getInstance();
 
@@ -68,11 +74,12 @@ public class ChatActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) { // User authorized
+                    Timber.d("User is authorized " + user.getUid());
+                    addTheUserDataToDb(user);
+
                     // Name to be displayed on the UI and attach the listener to receive the data
                     mUsername = user.getDisplayName();
-                    onSignedInInitialize(user);
                     loadAllAuthUsers();
-
                 } else { // User not authorized
                     // Do clear the adapter and detach the listener if the user not logged in
                     onSignedOutCleaner();
@@ -93,64 +100,36 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         };
-
-
     }
 
     private void loadAllAuthUsers() {
 
-        mUsersListener = new ChildEventListener() {
+        mUsersReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                AuthUser user = dataSnapshot.getValue(AuthUser.class);
-                mAuthUsers.add(user);
-                Timber.d("current user " + user.getName());
-            }
-
-            //region Unused
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                AuthUser userId = dataSnapshot.getValue(AuthUser.class);
+                Timber.d(userId + " name of the user ");
+                mAuthUsers.add(userId);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-            //endregion
-        };
-        initializeRecycler();
-        mUsersIdReference.addChildEventListener(mUsersListener);
-        mUsersAdapter = new UsersAdapter(mAuthUsers);
-        mUsersRV.setAdapter(mUsersAdapter);
-
+        });
     }
 
-    private void onSignedInInitialize(FirebaseUser authUser) {
+    private void addTheUserDataToDb(FirebaseUser authUser) {
         String userId = authUser.getUid();
         String userName = authUser.getDisplayName();
         String userPhotoUrl = null;
         if (authUser.getPhotoUrl() != null) {
             userPhotoUrl = authUser.getPhotoUrl().toString();
         }
+        AuthUser user = new AuthUser(userName, userPhotoUrl);
 
-        Timber.d("user id " + userId);
-
-        AuthUser user = new AuthUser(userId, userName, userPhotoUrl);
-
-        mUsersIdReference.push().setValue(user);
+        mUsersReference.child(userId).setValue(user);
     }
-
 
     private void onSignedOutCleaner() {
         mUsername = ANONYMOUS;
@@ -198,13 +177,14 @@ public class ChatActivity extends AppCompatActivity {
         super.onPause();
         if (mFbAuth != null)
             mFbAuth.removeAuthStateListener(mAuthListener);
+        if (mUsersAdapter != null)
+            mUsersAdapter.clear();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
+
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
 
     }

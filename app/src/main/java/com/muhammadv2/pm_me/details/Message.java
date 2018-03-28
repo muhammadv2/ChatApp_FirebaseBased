@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me;
+package com.muhammadv2.pm_me.details;
 
 
 public class Message {

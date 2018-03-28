@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me;
+package com.muhammadv2.pm_me.details;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -9,15 +9,11 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -27,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.muhammadv2.pm_me.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +118,7 @@ public class ChatDetailsActivity extends AppCompatActivity {
     }
 
     private void attachDatabaseListener() {
-        if (mChildListener == null)
+        if (mChildListener == null){
             // Instantiating listener over the db to get the stored data and listen to any changes
             mChildListener = new ChildEventListener() {
                 @Override
@@ -158,7 +155,7 @@ public class ChatDetailsActivity extends AppCompatActivity {
             };
         // Attaching the listener to the node Ref
         mMessageDbRef.addChildEventListener(mChildListener);
-    }
+    }}
 
     private void detachDatabaseListener() {
         if (mChildListener != null) {
@@ -213,7 +210,6 @@ public class ChatDetailsActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
             }
-
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -223,17 +219,12 @@ public class ChatDetailsActivity extends AppCompatActivity {
                     mSendButton.setEnabled(false);
                 }
             }
-
             @Override
             public void afterTextChanged(Editable editable) {
-
             }
         });
-
         // Set maximum length for a single message not exceed 1000.
         mMessageEditText.setFilters(new InputFilter[]{
                 new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
-
     }
-
 }

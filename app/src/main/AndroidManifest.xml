@@ -10,9 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ChatDetailsActivity"
-            android:parentActivityName=".ChatActivity" />
-        <activity android:name=".ChatActivity">
+            android:name=".details.ChatDetailsActivity"
+            android:parentActivityName=".main.ChatActivity" />
+        <activity android:name=".main.ChatActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

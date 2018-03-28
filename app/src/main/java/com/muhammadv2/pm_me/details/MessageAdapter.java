@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me;
+package com.muhammadv2.pm_me.details;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.muhammadv2.pm_me.R;
 
 import java.util.List;
 

@@ -11,10 +11,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.auth.api.Auth;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -44,6 +42,8 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
     private FirebaseAuth.AuthStateListener mAuthListener;
 
     private List<AuthUser> mAuthUsers;
+    private List<String> mUsersKeys;
+    private String mCurrentUserKey;
 
     @BindView(R.id.rv_users)
     RecyclerView mUsersRV;
@@ -59,10 +59,10 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
         Timber.plant(new Timber.DebugTree());
 
         mAuthUsers = new ArrayList<>();
+        mUsersKeys = new ArrayList<>();
 
         mFireBaseDb = FirebaseDatabase.getInstance();
         mUsersReference = mFireBaseDb.getReference().child(mUsersNode);
-
         mFbAuth = FirebaseAuth.getInstance();
 
         // Listener for Authentication changes
@@ -101,7 +101,7 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
      *                 Object and send it to the database
      */
     private void addTheUserDataToDb(FirebaseUser authUser) {
-        String userId = authUser.getUid();
+        mCurrentUserKey = authUser.getUid();
         String userName = authUser.getDisplayName();
         String userPhotoUrl = null;
         if (authUser.getPhotoUrl() != null) {
@@ -115,23 +115,22 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
         //           |- "userId"-
         //                       |- "userName"
         //                       |- "imageUrl"
-        mUsersReference.child(userId).setValue(user);
+        mUsersReference.child(mCurrentUserKey).setValue(user);
     }
 
     /**
-     * Extract all the users stored in the database to show them as a list
+     * Extract all the users stored in the database to show them as a list and prevent duplicate
+     * the users by checking the unique key before adding
      */
     private void loadAllAuthUsers() {
 
         mUsersReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    AuthUser authUser = ds.getValue(AuthUser.class);
-                    mAuthUsers.add(authUser);
-                }
-                initializeRecycler();
+                //Called every time data changes and when the first attach happen
+                mAuthUsers.clear(); // First clear all data to prevent duplication
+                addAllUserToTheList(dataSnapshot);
+                initAndPopulateRv();
             }
 
             @Override
@@ -140,7 +139,32 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
                         Toast.LENGTH_LONG).show();
             }
         });
+    }
 
+    /**
+     * Loop on DataSnapshot that holds all the node data
+     *
+     * @param dataSnapshot by getting the whole children the object holds we can find the current
+     *                     user and skip adding him and add only all other users in the list
+     */
+    private void addAllUserToTheList(DataSnapshot dataSnapshot) {
+
+        for (DataSnapshot singleChild : dataSnapshot.getChildren()) {
+            if (mCurrentUserKey.equals(singleChild.getKey())) {
+                Timber.d("This user already in the list");
+            } else {
+                AuthUser authUser = singleChild.getValue(AuthUser.class);
+                mUsersKeys.add(singleChild.getKey());
+                mAuthUsers.add(authUser);
+            }
+        }
+    }
+
+    private void initAndPopulateRv() {
+        mUsersRV.setHasFixedSize(true);
+        mUsersRV.setLayoutManager(new LinearLayoutManager(this));
+        mUsersAdapter = new UsersAdapter(mAuthUsers, this);
+        mUsersRV.setAdapter(mUsersAdapter);
     }
 
     private void onSignedOutCleaner() {
@@ -149,10 +173,6 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
     }
 
     private void detachDatabaseListener() {
-//        if (mChildListener != null) {
-//            mMessageDbRef.removeEventListener(mChildListener);
-//            mChildListener = null;
-//        }
         if (mUsersAdapter != null)
             mUsersAdapter.clear();
     }
@@ -173,13 +193,6 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
         }
     }
 
-    private void initializeRecycler() {
-        mUsersRV.setHasFixedSize(true);
-        mUsersRV.setLayoutManager(new LinearLayoutManager(this));
-        mUsersAdapter = new UsersAdapter(mAuthUsers, this);
-        mUsersRV.setAdapter(mUsersAdapter);
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -196,15 +209,12 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
-
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.sign_out_btn:
                 AuthUI.getInstance().signOut(this); // Sign out function as simple as that

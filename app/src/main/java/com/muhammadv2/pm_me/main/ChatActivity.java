@@ -150,9 +150,7 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
     private void addAllUserToTheList(DataSnapshot dataSnapshot) {
 
         for (DataSnapshot singleChild : dataSnapshot.getChildren()) {
-            if (mCurrentUserKey.equals(singleChild.getKey())) {
-                Timber.d("This user already in the list");
-            } else {
+            if (!mCurrentUserKey.equals(singleChild.getKey())) {
                 AuthUser authUser = singleChild.getValue(AuthUser.class);
                 mUsersKeys.add(singleChild.getKey());
                 mAuthUsers.add(authUser);

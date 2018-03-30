@@ -1,6 +1,7 @@
 package com.muhammadv2.pm_me.main;
 
 import android.content.Intent;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.muhammadv2.pm_me.R;
+import com.muhammadv2.pm_me.details.ChatDetailsActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +35,10 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
     private static final int RC_SIGN_IN = 305;
     private static final String mUsersNode = "users";
     private static final String ANONYMOUS = "ANONYMOUS";
+    private static final String USERS_LIST = "users_list";
+    private static final String CURRENT_USER_UID = "currentUid";
+    private static final String CHOOSEN_UID = "chooseUid";
+
     private String mUsername = ANONYMOUS;
 
     // Firebase instances
@@ -42,7 +48,6 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
     private FirebaseAuth.AuthStateListener mAuthListener;
 
     private List<AuthUser> mAuthUsers;
-    private List<String> mUsersKeys;
     private String mCurrentUserKey;
 
     @BindView(R.id.rv_users)
@@ -59,7 +64,6 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
         Timber.plant(new Timber.DebugTree());
 
         mAuthUsers = new ArrayList<>();
-        mUsersKeys = new ArrayList<>();
 
         mFireBaseDb = FirebaseDatabase.getInstance();
         mUsersReference = mFireBaseDb.getReference().child(mUsersNode);
@@ -152,8 +156,10 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
         for (DataSnapshot singleChild : dataSnapshot.getChildren()) {
             if (!mCurrentUserKey.equals(singleChild.getKey())) {
                 AuthUser authUser = singleChild.getValue(AuthUser.class);
-                mUsersKeys.add(singleChild.getKey());
+                if (authUser != null)
+                    authUser.setUid(singleChild.getKey());
                 mAuthUsers.add(authUser);
+
             }
         }
     }
@@ -222,6 +228,14 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
 
     @Override
     public void onClick(int position) {
-        Timber.d("position " + position);
+
+        AuthUser friend = mAuthUsers.get(position);
+        String friendUid = friend.getUid();
+
+        Intent intent = new Intent(this, ChatDetailsActivity.class);
+        intent.putParcelableArrayListExtra(USERS_LIST, (ArrayList<? extends Parcelable>) mAuthUsers);
+        intent.putExtra(CURRENT_USER_UID, mCurrentUserKey);
+        intent.putExtra(CHOOSEN_UID, friendUid);
+        startActivity(intent);
     }
 }

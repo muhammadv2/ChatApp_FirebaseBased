@@ -1,8 +1,10 @@
 package com.muhammadv2.pm_me.main;
 
+
+import android.os.Parcel;
 import android.os.Parcelable;
 
-class AuthUser implements Parcelable {
+public class AuthUser implements Parcelable {
 
     private String uid, name, imageUrl;
 
@@ -15,20 +17,38 @@ class AuthUser implements Parcelable {
         this.imageUrl = imageUrl;
     }
 
-    public String getName() {
-        return name;
+    protected AuthUser(Parcel in) {
+        uid = in.readString();
+        name = in.readString();
+        imageUrl = in.readString();
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
+    public static final Creator<AuthUser> CREATOR = new Creator<AuthUser>() {
+        @Override
+        public AuthUser createFromParcel(Parcel in) {
+            return new AuthUser(in);
+        }
+
+        @Override
+        public AuthUser[] newArray(int size) {
+            return new AuthUser[size];
+        }
+    };
 
     public void setUid(String uid) {
         this.uid = uid;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public String getUid() {
         return uid;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     @Override
@@ -37,27 +57,9 @@ class AuthUser implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(android.os.Parcel dest, int flags) {
-        dest.writeString(this.name);
-        dest.writeString(this.imageUrl);
-        dest.writeString(this.uid);
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(uid);
+        parcel.writeString(name);
+        parcel.writeString(imageUrl);
     }
-
-    protected AuthUser(android.os.Parcel in) {
-        this.name = in.readString();
-        this.imageUrl = in.readString();
-        this.uid = in.readString();
-    }
-
-    public static final Parcelable.Creator<AuthUser> CREATOR = new Parcelable.Creator<AuthUser>() {
-        @Override
-        public AuthUser createFromParcel(android.os.Parcel source) {
-            return new AuthUser(source);
-        }
-
-        @Override
-        public AuthUser[] newArray(int size) {
-            return new AuthUser[size];
-        }
-    };
 }

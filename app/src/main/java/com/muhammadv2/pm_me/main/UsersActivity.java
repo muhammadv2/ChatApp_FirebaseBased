@@ -29,12 +29,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnItemClickLister {
+public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnItemClickLister {
 
     private static final int RC_SIGN_IN = 305;
     private static final String mUsersNode = "users";
-    public static final String CURRENT_DATA = "currentUid";
-    public static final String FRIEND_DATA = "chooseUid";
+    public static final String CURRENT_USER_DATA = "currentUid";
+    public static final String TARGETED_USER_DATA = "chooseUid";
 
     private DatabaseReference mUsersReference;
     private FirebaseAuth mFbAuth;
@@ -52,7 +52,7 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat);
+        setContentView(R.layout.activity_user);
 
         ButterKnife.bind(this);
 
@@ -132,7 +132,7 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(ChatActivity.this, R.string.error_load_users,
+                Toast.makeText(UsersActivity.this, R.string.error_load_users,
                         Toast.LENGTH_LONG).show();
             }
         });
@@ -154,6 +154,7 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
                 mAuthUsers.add(authUser);
             } else {
                 mCurrentUser = singleChild.getValue(AuthUser.class);
+                mCurrentUser.setUid(singleChild.getKey());
             }
         }
     }
@@ -221,11 +222,11 @@ public class ChatActivity extends AppCompatActivity implements UsersAdapter.OnIt
 
     @Override
     public void onClick(int position) {
-        AuthUser chatWithUser = mAuthUsers.get(position);
+        AuthUser currentUser = mAuthUsers.get(position);
         Bundle bundle = new Bundle();
 
-        bundle.putParcelable(FRIEND_DATA, chatWithUser);
-        bundle.putParcelable(CURRENT_DATA, mCurrentUser);
+        bundle.putParcelable(TARGETED_USER_DATA, currentUser);
+        bundle.putParcelable(CURRENT_USER_DATA, mCurrentUser);
 
         Intent intent = new Intent(this, ChatDetailsActivity.class);
         intent.putExtras(bundle);

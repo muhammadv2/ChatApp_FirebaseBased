@@ -25,9 +25,10 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.main.AuthUser;
-import com.muhammadv2.pm_me.main.ChatActivity;
+import com.muhammadv2.pm_me.main.UsersActivity;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -41,7 +42,7 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
     private static final int RC_PHOTO_PICKER = 909;
 
-    public static final String MESSAGES_NODE_DB = "messages";
+    public static final String MESSAGES_NODE_DB = "messages/";
     public static final String PHOTOS_DATA_STORAGE = "chat_photos";
 
     @BindView(R.id.rv_messages_container)
@@ -65,8 +66,8 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
 
     private List<Message> messageList; // List to hold all the messages retrieved from the db
 
-    private AuthUser current;
-    private AuthUser friend;
+    private AuthUser mCurrentUser;
+    private AuthUser mTargetedUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,15 +84,10 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
 
         saveDataComingWithIntent();
 
-        // Instantiating Fb database entry and creating a child named messages in th db.
-        FirebaseDatabase mFireBaseDb = FirebaseDatabase.getInstance();
-        FirebaseStorage mFirebaseStorage = FirebaseStorage.getInstance();
-
-        mMessageDbRef = mFireBaseDb.getReference().child(MESSAGES_NODE_DB);
-        mStorageRef = mFirebaseStorage.getReference().child(PHOTOS_DATA_STORAGE);
+        mMessageDbRef = FirebaseDatabase.getInstance().getReference().child(MESSAGES_NODE_DB);
+        mStorageRef = FirebaseStorage.getInstance().getReference().child(PHOTOS_DATA_STORAGE);
 
         messageList = new ArrayList<>();
-
         retrieveAndSaveChatData();
     }
 
@@ -99,52 +95,56 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         if (bundle == null) return;
-        current = bundle.getParcelable(ChatActivity.CURRENT_DATA);
-        friend = bundle.getParcelable(ChatActivity.FRIEND_DATA);
-
-        Timber.d("current user name %s", current.getName());
-        Timber.d("friend user name %s", friend.getName());
+        mCurrentUser = bundle.getParcelable(UsersActivity.CURRENT_USER_DATA);
+        mTargetedUser = bundle.getParcelable(UsersActivity.TARGETED_USER_DATA);
     }
 
     private void retrieveAndSaveChatData() {
-        if (mChildListener == null) {
-            // Instantiating listener over the db to get the stored data and listen to any changes
-            mChildListener = new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    messageList.add(dataSnapshot.getValue(Message.class));
-                    // Send the list of the messages to the adapter and populate the recycler view
-                    instantiateRecyclerView();
-                }
+        mMessageDbRef.child(mCurrentUser.getUid())
+                .child(mTargetedUser.getUid())
+                .addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        Timber.d("equail " + dataSnapshot.getChildrenCount());
 
-                //region unused
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                        if (dataSnapshot.getChildrenCount() <= 0) return;
+                        boolean savedBefore = false;
+                        for (DataSnapshot currentUser : dataSnapshot.getChildren()) {
+                            if (savedBefore == true) {
+                                return;
+                            }
+                            savedBefore = true;
+                            Message message = dataSnapshot.getValue(Message.class);
+                            messageList.add(message);
+                            instantiateRecyclerView();
+                            Timber.d("this key" + currentUser.getKey());
 
-                    //Todo called if the data already in the db has been changed
-                }
+                        }
+                    }
 
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    //Todo called when the db data has been deleted
-                }
+                    //region unused
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                    //Todo called when the data has been moved to another node (json object in db)
-                }
+                        //Todo called if the data already in the db has been changed
+                    }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    //Todo Called when there's an error most of the time there's no authentication
-                }
-                //endregion
-            };
-            // Attaching the listener to the node Ref
-            mMessageDbRef.addChildEventListener(mChildListener);
-        } else {
-            instantiateRecyclerView();
-        }
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        //Todo called when the db data has been deleted
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                        //Todo called when the data has been moved to another node (json object in db)
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //Todo Called when there's an error most of the time there's no authentication
+                    }
+                    //endregion
+                });
     }
 
     private void instantiateRecyclerView() {
@@ -179,7 +179,7 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
                         if (taskSnapshot.getDownloadUrl() == null) return;
                         // The photo uploaded successfully get its url and push it to the db
                         String mImageUri = taskSnapshot.getDownloadUrl().toString();
-                        Message message = new Message(current.getName(), null, mImageUri);
+                        Message message = new Message(mCurrentUser.getName(), null, mImageUri);
                         mMessageDbRef.push().setValue(message);
                     }
                 });
@@ -201,12 +201,12 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
             case R.id.btn_send_msg:
                 // Populate message model with the input from the user
                 Message message =
-                        new Message(current.getName(),
+                        new Message(mCurrentUser.getName(),
                                 mMessageEditText.getText().toString().trim(), // Message body
                                 null);
 
-                // .push() method used to write to the fb db putting the value on messages node
-                mMessageDbRef.push().setValue(message);
+                mMessageDbRef.child(mCurrentUser.getUid()).child(mTargetedUser.getUid()).push().setValue(message);
+                mMessageDbRef.child(mTargetedUser.getUid()).child(mCurrentUser.getUid()).push().setValue(message);
 
                 // Clear input box
                 mMessageEditText.setText("");

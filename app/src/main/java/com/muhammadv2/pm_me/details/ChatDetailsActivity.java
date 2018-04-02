@@ -100,9 +100,14 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
         saveDataComingWithIntent();
 
         mMessagesDbRef = FirebaseDatabase.getInstance().getReference().child(MESSAGES_NODE_DB);
-        updateThePathAccordingIfExistOrNot();
 
         mStorageRef = FirebaseStorage.getInstance().getReference().child(PHOTOS_DATA_STORAGE);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        updateThePathAccordingIfExistOrNot();
     }
 
     private void saveDataComingWithIntent() {
@@ -148,7 +153,7 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void retrieveAndSaveChatData() {
-        mUsersChatDbRef.addChildEventListener(new ChildEventListener() {
+        mChildListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Message message = dataSnapshot.getValue(Message.class);
@@ -178,7 +183,8 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
                 //Todo Called when there's an error most of the time there's no authentication
             }
             //endregion
-        });
+        };
+        mUsersChatDbRef.addChildEventListener(mChildListener);
     }
 
     private void instantiateRecyclerView() {
@@ -250,12 +256,6 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        detachDatabaseListener();
-    }
-
     private void editTextWatcher() {
         // Only unable the send button when there's text to send
         mMessageEditText.addTextChangedListener(new TextWatcher() {
@@ -279,5 +279,11 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
         // Set maximum length for a single message not exceed 1000.
         mMessageEditText.setFilters(new InputFilter[]{
                 new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        detachDatabaseListener();
     }
 }

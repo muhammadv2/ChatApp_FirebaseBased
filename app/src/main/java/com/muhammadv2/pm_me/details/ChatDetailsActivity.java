@@ -20,6 +20,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -28,7 +29,6 @@ import com.muhammadv2.pm_me.main.AuthUser;
 import com.muhammadv2.pm_me.main.UsersActivity;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -41,26 +41,23 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
 
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
     private static final int RC_PHOTO_PICKER = 909;
-
-    public static final String MESSAGES_NODE_DB = "messages/";
+    public static final String MESSAGES_NODE_DB = "messages";
     public static final String PHOTOS_DATA_STORAGE = "chat_photos";
 
     @BindView(R.id.rv_messages_container)
     RecyclerView mMessageRv;
-
     MessageAdapter mMessageAdapter;
 
     @BindView(R.id.btn_select_image)
     ImageButton mPhotoPickerButton;
-
     @BindView(R.id.et_user_input)
     EditText mMessageEditText;
-
     @BindView(R.id.btn_send_msg)
     Button mSendButton;
 
     // Fire base instances
-    private DatabaseReference mMessageDbRef;
+    private DatabaseReference mUsersChatDbRef;
+    private DatabaseReference mMessagesDbRef;
     private ChildEventListener mChildListener;
     private StorageReference mStorageRef;
 
@@ -68,6 +65,8 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
 
     private AuthUser mCurrentUser;
     private AuthUser mTargetedUser;
+
+    private String existsPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,16 +78,17 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
         mPhotoPickerButton.setOnClickListener(this);
         mSendButton.setOnClickListener(this);
 
+        messageList = new ArrayList<>();
         // Set some restrictions over the user input
+
         editTextWatcher();
 
         saveDataComingWithIntent();
 
-        mMessageDbRef = FirebaseDatabase.getInstance().getReference().child(MESSAGES_NODE_DB);
-        mStorageRef = FirebaseStorage.getInstance().getReference().child(PHOTOS_DATA_STORAGE);
+        mMessagesDbRef = FirebaseDatabase.getInstance().getReference().child(MESSAGES_NODE_DB);
+        updateThePathAccordingIfExistOrNot();
 
-        messageList = new ArrayList<>();
-        retrieveAndSaveChatData();
+        mStorageRef = FirebaseStorage.getInstance().getReference().child(PHOTOS_DATA_STORAGE);
     }
 
     private void saveDataComingWithIntent() {
@@ -99,52 +99,73 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
         mTargetedUser = bundle.getParcelable(UsersActivity.TARGETED_USER_DATA);
     }
 
+    private void updateThePathAccordingIfExistOrNot() {
+        mMessagesDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot singleSnap : dataSnapshot.getChildren()) {
+                    String singleSnapKey = singleSnap.getKey();
+                    Timber.d("Checks %s", checkIfPathContainsBothKeys(singleSnapKey));
+                    if (checkIfPathContainsBothKeys(singleSnapKey)) {
+                        existsPath = singleSnap.getKey();
+                        break;
+                    }
+
+                }
+                if (existsPath == null) {
+                    existsPath = mCurrentUser.getUid() + "-" + mTargetedUser.getUid();
+                }
+                mUsersChatDbRef = FirebaseDatabase.getInstance().getReference()
+                        .child(MESSAGES_NODE_DB)
+                        .child(existsPath);
+                Timber.d(mUsersChatDbRef.getKey());
+
+                retrieveAndSaveChatData();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+
+    private boolean checkIfPathContainsBothKeys(String singleKey) {
+        return !singleKey.isEmpty() && singleKey.contains(mCurrentUser.getUid())
+                && singleKey.contains(mTargetedUser.getUid());
+    }
+
     private void retrieveAndSaveChatData() {
-        mMessageDbRef.child(mCurrentUser.getUid())
-                .child(mTargetedUser.getUid())
-                .addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        Timber.d("equail " + dataSnapshot.getChildrenCount());
+        mUsersChatDbRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Message message = dataSnapshot.getValue(Message.class);
+                messageList.add(message);
+                instantiateRecyclerView();
+            }
 
-                        if (dataSnapshot.getChildrenCount() <= 0) return;
-                        boolean savedBefore = false;
-                        for (DataSnapshot currentUser : dataSnapshot.getChildren()) {
-                            if (savedBefore == true) {
-                                return;
-                            }
-                            savedBefore = true;
-                            Message message = dataSnapshot.getValue(Message.class);
-                            messageList.add(message);
-                            instantiateRecyclerView();
-                            Timber.d("this key" + currentUser.getKey());
+            //region unused
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                        }
-                    }
+                //Todo called if the data already in the db has been changed
+            }
 
-                    //region unused
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                //Todo called when the db data has been deleted
+            }
 
-                        //Todo called if the data already in the db has been changed
-                    }
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                //Todo called when the data has been moved to another node (json object in db)
+            }
 
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-                        //Todo called when the db data has been deleted
-                    }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                        //Todo called when the data has been moved to another node (json object in db)
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        //Todo Called when there's an error most of the time there's no authentication
-                    }
-                    //endregion
-                });
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                //Todo Called when there's an error most of the time there's no authentication
+            }
+            //endregion
+        });
     }
 
     private void instantiateRecyclerView() {
@@ -156,7 +177,7 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
 
     private void detachDatabaseListener() {
         if (mChildListener != null) {
-            mMessageDbRef.removeEventListener(mChildListener);
+            mUsersChatDbRef.removeEventListener(mChildListener);
             mChildListener = null;
         }
         if (mMessageAdapter != null)
@@ -164,7 +185,7 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
@@ -179,8 +200,10 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
                         if (taskSnapshot.getDownloadUrl() == null) return;
                         // The photo uploaded successfully get its url and push it to the db
                         String mImageUri = taskSnapshot.getDownloadUrl().toString();
-                        Message message = new Message(mCurrentUser.getName(), null, mImageUri);
-                        mMessageDbRef.push().setValue(message);
+                        Message message = new Message(mCurrentUser.getName(),
+                                null,
+                                mImageUri);
+                        mUsersChatDbRef.push().setValue(message);
                     }
                 });
             }
@@ -205,9 +228,7 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
                                 mMessageEditText.getText().toString().trim(), // Message body
                                 null);
 
-                mMessageDbRef.child(mCurrentUser.getUid()).child(mTargetedUser.getUid()).push().setValue(message);
-                mMessageDbRef.child(mTargetedUser.getUid()).child(mCurrentUser.getUid()).push().setValue(message);
-
+                mUsersChatDbRef.push().setValue(message);
                 // Clear input box
                 mMessageEditText.setText("");
                 break;

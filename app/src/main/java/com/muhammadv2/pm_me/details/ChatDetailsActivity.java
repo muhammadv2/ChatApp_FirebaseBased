@@ -35,8 +35,22 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-//Todo preserve the data in coming see what cause not showing it after stopping or pausing the activity
-//Todo make the messages chat connection node
+/**
+ * This class is to show messages between users separately the logic is a bit complicated but this
+ * was is the best i could get
+ * <p>
+ * 1. {@link #updateThePathAccordingIfExistOrNot()} First we have to listen to the exists messages
+ * node in the database to find if the keys from current user and targeted user exists there if it
+ * exists we will keep the key to use it again to push and not duplicate keys if not will simply
+ * create a new one
+ * <p>
+ * 2. {@link #retrieveAndSaveChatData()} Will call this method after making sure we have a path
+ * either new or exist and will populate the message object directly with the coming data no need
+ * to iterate because {@link #mChildListener} read the node children directly
+ * <p>
+ * 3. Finally push when the send button is clicked if a normal message and when back from picking
+ * and image basically by using our updated path of {@link #mUsersChatDbRef}
+ */
 public class ChatDetailsActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
@@ -104,21 +118,20 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot singleSnap : dataSnapshot.getChildren()) {
-                    String singleSnapKey = singleSnap.getKey();
-                    Timber.d("Checks %s", checkIfPathContainsBothKeys(singleSnapKey));
+                    String singleSnapKey = singleSnap.getKey(); // save the coming keys
+                    // check if the key contains both users keys
                     if (checkIfPathContainsBothKeys(singleSnapKey)) {
-                        existsPath = singleSnap.getKey();
+                        existsPath = singleSnap.getKey(); // if yes update the exists path
                         break;
                     }
-
                 }
                 if (existsPath == null) {
+                    // if the existsPath not updated specify a new one by combining the users keys
                     existsPath = mCurrentUser.getUid() + "-" + mTargetedUser.getUid();
                 }
                 mUsersChatDbRef = FirebaseDatabase.getInstance().getReference()
                         .child(MESSAGES_NODE_DB)
-                        .child(existsPath);
-                Timber.d(mUsersChatDbRef.getKey());
+                        .child(existsPath);  //finally looks like /messages/24L0kQx7506-2XK48YsESFaQ
 
                 retrieveAndSaveChatData();
             }

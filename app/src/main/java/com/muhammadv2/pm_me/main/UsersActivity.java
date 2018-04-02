@@ -18,6 +18,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.muhammadv2.pm_me.FirebaseUtils;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.details.ChatDetailsActivity;
 
@@ -28,6 +29,10 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
+
+//Todo when clone this project you have to add your own json file from your google account you can
+//get that easily by creating a new project in the app folder
+// Todo  Also you have to add your key for firebase in the manifest
 
 public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnItemClickLister {
 
@@ -60,7 +65,7 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
 
         mAuthUsers = new ArrayList<>();
 
-        FirebaseDatabase mFireBaseDb = FirebaseDatabase.getInstance();
+        FirebaseDatabase mFireBaseDb = FirebaseUtils.getDatabase();
         mUsersReference = mFireBaseDb.getReference().child(mUsersNode);
         mFbAuth = FirebaseAuth.getInstance();
 

@@ -24,6 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.muhammadv2.pm_me.FirebaseUtils;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.main.AuthUser;
 import com.muhammadv2.pm_me.main.UsersActivity;
@@ -70,6 +71,7 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
     Button mSendButton;
 
     // Fire base instances
+    private FirebaseDatabase mFirebaseDb;
     private DatabaseReference mUsersChatDbRef;
     private DatabaseReference mMessagesDbRef;
     private ChildEventListener mChildListener;
@@ -99,7 +101,8 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
 
         saveDataComingWithIntent();
 
-        mMessagesDbRef = FirebaseDatabase.getInstance().getReference().child(MESSAGES_NODE_DB);
+
+        mMessagesDbRef = FirebaseUtils.getDatabase().getReference().child(MESSAGES_NODE_DB);
 
         mStorageRef = FirebaseStorage.getInstance().getReference().child(PHOTOS_DATA_STORAGE);
     }
@@ -134,7 +137,7 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
                     // if the existsPath not updated specify a new one by combining the users keys
                     existsPath = mCurrentUser.getUid() + "-" + mTargetedUser.getUid();
                 }
-                mUsersChatDbRef = FirebaseDatabase.getInstance().getReference()
+                mUsersChatDbRef = FirebaseUtils.getDatabase().getReference()
                         .child(MESSAGES_NODE_DB)
                         .child(existsPath);  //finally looks like /messages/24L0kQx7506-2XK48YsESFaQ
 

@@ -1,6 +1,5 @@
 package com.muhammadv2.pm_me.details;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,11 +19,9 @@ import butterknife.ButterKnife;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
-    private Context mContext;
     private List<Message> mMessagesList;
 
-    MessageAdapter(Context context, List<Message> messagesList) {
-        mContext = context;
+    MessageAdapter(List<Message> messagesList) {
         mMessagesList = messagesList;
     }
 
@@ -43,7 +40,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.senderName.setText(message.getSenderName());
         holder.messageBody.setText(message.getMessageBody());
 
-        Glide.with(mContext)
+        Glide.with(holder.messageImage.getContext())
                 .load(message.getImageUrl())
                 .into(holder.messageImage);
     }

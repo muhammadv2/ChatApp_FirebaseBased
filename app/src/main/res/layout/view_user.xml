@@ -25,11 +25,8 @@
         android:layout_marginStart="@dimen/dp_16"
         android:layout_marginTop="@dimen/dp_16"
         android:contentDescription="@string/user_image"
-        app:civ_border_color="#800"
-        app:civ_border_width=".5dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/fui_done_check_mark"
         tools:ignore="VectorDrawableCompat" />
 
     <View

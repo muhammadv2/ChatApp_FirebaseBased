@@ -24,7 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.muhammadv2.pm_me.FirebaseUtils;
+import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.main.AuthUser;
 import com.muhammadv2.pm_me.main.UsersActivity;
@@ -71,7 +71,6 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
     Button mSendButton;
 
     // Fire base instances
-    private FirebaseDatabase mFirebaseDb;
     private DatabaseReference mUsersChatDbRef;
     private DatabaseReference mMessagesDbRef;
     private ChildEventListener mChildListener;
@@ -193,7 +192,7 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
     private void instantiateRecyclerView() {
         mMessageRv.setHasFixedSize(true);
         mMessageRv.setLayoutManager(new LinearLayoutManager(this));
-        mMessageAdapter = new MessageAdapter(ChatDetailsActivity.this, messageList);
+        mMessageAdapter = new MessageAdapter(messageList);
         mMessageRv.setAdapter(mMessageAdapter);
     }
 

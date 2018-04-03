@@ -8,6 +8,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -18,8 +20,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.muhammadv2.pm_me.FirebaseUtils;
+import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.R;
+import com.muhammadv2.pm_me.Utils.GlideImageHandlingUtils;
 import com.muhammadv2.pm_me.details.ChatDetailsActivity;
 
 import java.util.ArrayList;
@@ -34,7 +37,7 @@ import timber.log.Timber;
 //get that easily by creating a new project in the app folder
 // Todo  Also you have to add your key for firebase in the manifest
 
-public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnItemClickLister {
+public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnItemClickLister  {
 
     private static final int RC_SIGN_IN = 305;
     private static final String mUsersNode = "users";
@@ -53,6 +56,10 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
     @BindView(R.id.rv_users)
     RecyclerView mUsersRV;
     UsersAdapter mUsersAdapter;
+    @BindView(R.id.iv_current_user_img)
+    ImageView mCurrentUserImg;
+    @BindView(R.id.tv_current_user_name)
+    TextView mCurrentUserName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,8 +167,20 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
             } else {
                 mCurrentUser = singleChild.getValue(AuthUser.class);
                 mCurrentUser.setUid(singleChild.getKey());
+                setCurrentUserData();
             }
         }
+    }
+
+    private void setCurrentUserData() {
+        mCurrentUserName.setText(
+                String.format("%s %s", getString(R.string.welcome_user), mCurrentUser.getName()));
+
+        GlideImageHandlingUtils.loadImageIntoView(
+                UsersActivity.this,
+                mCurrentUser.getImageUrl(),
+                mCurrentUserImg);
+
     }
 
     private void initAndPopulateRv() {

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.muhammadv2.pm_me.R;
+import com.muhammadv2.pm_me.Utils.GlideImageHandlingUtils;
 
 import java.util.List;
 
@@ -47,10 +48,10 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         AuthUser user = mAuthUsers.get(position);
 
-        Glide.with(holder.userImage.getContext())
-                .applyDefaultRequestOptions(new RequestOptions().placeholder(R.drawable.man))
-                .load(user.getImageUrl())
-                .into(holder.userImage);
+        GlideImageHandlingUtils.loadImageIntoView(
+                holder.userImage.getContext(),
+                user.getImageUrl(),
+                holder.userImage);
         holder.userName.setText(user.getName());
     }
 

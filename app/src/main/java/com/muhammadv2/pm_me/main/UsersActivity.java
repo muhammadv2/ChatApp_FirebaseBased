@@ -8,7 +8,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +22,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.muhammadv2.pm_me.Utils.FancyGifDialogCreator;
 import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.Utils.GlideImageHandlingUtils;
@@ -37,7 +40,8 @@ import timber.log.Timber;
 //get that easily by creating a new project in the app folder
 // Todo  Also you have to add your key for firebase in the manifest
 
-public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnItemClickLister  {
+public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnItemClickLister
+        , View.OnClickListener {
 
     private static final int RC_SIGN_IN = 305;
     private static final String mUsersNode = "users";
@@ -52,14 +56,15 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
     private String mCurrentUserKey;
     private AuthUser mCurrentUser;
 
-
     @BindView(R.id.rv_users)
     RecyclerView mUsersRV;
     UsersAdapter mUsersAdapter;
     @BindView(R.id.iv_current_user_img)
-    ImageView mCurrentUserImg;
+    ImageView mIvUserImage;
     @BindView(R.id.tv_current_user_name)
-    TextView mCurrentUserName;
+    TextView mTvUserName;
+    @BindView(R.id.current_user_container)
+    LinearLayout mContainerUserData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +108,7 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
                 }
             }
         };
+        mContainerUserData.setOnClickListener(this);
     }
 
     /**
@@ -173,14 +179,12 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
     }
 
     private void setCurrentUserData() {
-        mCurrentUserName.setText(
-                String.format("%s %s", getString(R.string.welcome_user), mCurrentUser.getName()));
+        mTvUserName.setText(mCurrentUser.getName());
 
         GlideImageHandlingUtils.loadImageIntoView(
                 UsersActivity.this,
                 mCurrentUser.getImageUrl(),
-                mCurrentUserImg);
-
+                mIvUserImage);
     }
 
     private void initAndPopulateRv() {
@@ -256,5 +260,14 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
         intent.putExtras(bundle);
 
         startActivity(intent);
+    }
+
+    @Override
+    public void onClick(View view) {
+        int viewId = view.getId();
+        switch (viewId) {
+            case R.id.current_user_container:
+                FancyGifDialogCreator.createFancyAlertDialog(this, mCurrentUser.getName());
+        }
     }
 }

@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.muhammadv2.pm_me"
-        minSdkVersion 18
+        minSdkVersion 19
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -46,6 +46,7 @@ dependencies {
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     implementation 'com.daasuu:BubbleLayout:1.2.0'
+    implementation 'com.github.Shashank02051997:FancyAlertDialog-Android:0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

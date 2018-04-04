@@ -4,13 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lightBackGround"
     tools:context="com.muhammadv2.pm_me.main.UsersActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_112"
-        android:background="@color/colorPrimary">
+        android:background="@color/colorPrimary"
+        app:layout_behavior="com.muhammadv2.pm_me.FixAppBarLayoutBehavior">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar_layout"
@@ -19,6 +21,7 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <LinearLayout
+                android:id="@+id/current_user_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="@dimen/dp_16"

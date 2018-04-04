@@ -92,6 +92,7 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
         Timber.plant(new Timber.DebugTree());
         mPhotoPickerButton.setOnClickListener(this);
         mSendButton.setOnClickListener(this);
+        mSendButton.setEnabled(false);
 
         messageList = new ArrayList<>();
         // Set some restrictions over the user input
@@ -99,7 +100,6 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
         editTextWatcher();
 
         saveDataComingWithIntent();
-
 
         mMessagesDbRef = FirebaseUtils.getDatabase().getReference().child(MESSAGES_NODE_DB);
 

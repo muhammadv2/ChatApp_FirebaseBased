@@ -10,4 +10,6 @@
     <string name="user_image">User image</string>
     <string name="error_load_users">There\'s an error, pleas try again</string>
     <string name="welcome_user">Welcome</string>
+    <string name="empty_screen">empty screen</string>
+    <string name="empty_screen_text">Break the ice by telling a joke\n A bad one!</string>
 </resources>

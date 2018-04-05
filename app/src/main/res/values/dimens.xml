@@ -10,4 +10,5 @@
     <dimen name="sp_18">18sp</dimen>
     <dimen name="dp_112">112dp</dimen>
     <dimen name="dp_96">96dp</dimen>
+    <dimen name="dp_240">240dp</dimen>
 </resources>

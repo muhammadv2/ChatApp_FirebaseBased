@@ -1,8 +1,10 @@
 package com.muhammadv2.pm_me.details;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +12,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -19,13 +22,12 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.R;
+import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.main.AuthUser;
 import com.muhammadv2.pm_me.main.UsersActivity;
 
@@ -45,8 +47,8 @@ import timber.log.Timber;
  * exists we will keep the key to use it again to push and not duplicate keys if not will simply
  * create a new one
  * <p>
- * 2. {@link #retrieveAndSaveChatData()} Will call this method after making sure we have a path
- * either new or exist and will populate the message object directly with the coming data no need
+ * 2. {@link #retrieveAndSaveChatData()} Will be called after make sure we have a path
+ * either new or exists and will populate the message object directly with the coming data no need
  * to iterate because {@link #mChildListener} read the node children directly
  * <p>
  * 3. Finally push when the send button is clicked if a normal message and when back from picking
@@ -88,6 +90,13 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_details);
 
+        saveDataComingWithIntent();
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(mTargetedUser.getName());
+        }
+
         ButterKnife.bind(this);
         Timber.plant(new Timber.DebugTree());
         mPhotoPickerButton.setOnClickListener(this);
@@ -95,14 +104,11 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
         mSendButton.setEnabled(false);
 
         messageList = new ArrayList<>();
-        // Set some restrictions over the user input
 
+        // Set some restrictions over the user input
         editTextWatcher();
 
-        saveDataComingWithIntent();
-
         mMessagesDbRef = FirebaseUtils.getDatabase().getReference().child(MESSAGES_NODE_DB);
-
         mStorageRef = FirebaseStorage.getInstance().getReference().child(PHOTOS_DATA_STORAGE);
     }
 
@@ -252,6 +258,16 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
                 mUsersChatDbRef.push().setValue(message);
                 // Clear input box
                 mMessageEditText.setText("");
+
+                // Check if no view has focus:
+                View focusedView = this.getCurrentFocus();
+                if (focusedView != null) {
+                    InputMethodManager imm = (InputMethodManager)
+                            getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    }
+                }
                 break;
             default:
                 Timber.d("Not recognized view");

@@ -1,14 +1,13 @@
 package com.muhammadv2.pm_me.main;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -22,9 +21,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.muhammadv2.pm_me.Utils.FancyGifDialogCreator;
-import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.R;
+import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.Utils.GlideImageHandlingUtils;
 import com.muhammadv2.pm_me.details.ChatDetailsActivity;
 
@@ -36,12 +34,15 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-//Todo when clone this project you have to add your own json file from your google account you can
-//get that easily by creating a new project in the app folder
-// Todo  Also you have to add your key for firebase in the manifest
+//Todo when clone this project you have to add your own google-services file from your google account to the app directory
 
-public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnItemClickLister
-        , View.OnClickListener {
+/**
+ * This class is to show a list of authenticated users by firstly fire
+ * {@link #mAuthListener} to find if the current user is registered if not redirect him to sign up
+ * screen if yes then load the list of the users by calling this method {@link #loadAllAuthUsers()}
+ * and also make sure to add the current user  {@link #addAllUserToTheList(DataSnapshot)}
+ */
+public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnItemClickLister {
 
     private static final int RC_SIGN_IN = 305;
     private static final String mUsersNode = "users";
@@ -81,7 +82,6 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
         mUsersReference = mFireBaseDb.getReference().child(mUsersNode);
         mFbAuth = FirebaseAuth.getInstance();
 
-        // Listener for Authentication changes
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -108,7 +108,6 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
                 }
             }
         };
-        mContainerUserData.setOnClickListener(this);
     }
 
     /**
@@ -262,12 +261,4 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
         startActivity(intent);
     }
 
-    @Override
-    public void onClick(View view) {
-        int viewId = view.getId();
-        switch (viewId) {
-            case R.id.current_user_container:
-                FancyGifDialogCreator.createFancyAlertDialog(this, mCurrentUser.getName());
-        }
-    }
 }

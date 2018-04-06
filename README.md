@@ -6,13 +6,6 @@
 * Storage
 * Database
 
-## Libraries used
-
-* Authorization
-* Storage
-* Database
-
-
 ## Getting Started
 
 To start using the sample just clone the project and add your own copy of  google-services file from your google account to the app

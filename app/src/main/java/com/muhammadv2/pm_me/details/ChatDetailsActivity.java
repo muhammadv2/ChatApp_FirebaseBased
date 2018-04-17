@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -221,17 +220,14 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
             if (selectedImage != null) {
                 StorageReference photoRef = mStorageRef.child(selectedImage.getLastPathSegment());
                 UploadTask uploadTask = photoRef.putFile(selectedImage);
-                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        if (taskSnapshot.getDownloadUrl() == null) return;
-                        // The photo uploaded successfully get its url and push it to the db
-                        String mImageUri = taskSnapshot.getDownloadUrl().toString();
-                        Message message = new Message(mCurrentUser.getName(),
-                                null,
-                                mImageUri);
-                        mUsersChatDbRef.push().setValue(message);
-                    }
+                uploadTask.addOnSuccessListener(taskSnapshot -> {
+                    if (taskSnapshot.getDownloadUrl() == null) return;
+                    // The photo uploaded successfully get its url and push it to the db
+                    String mImageUri = taskSnapshot.getDownloadUrl().toString();
+                    Message message = new Message(mCurrentUser.getName(),
+                            null,
+                            mImageUri);
+                    mUsersChatDbRef.push().setValue(message);
                 });
             }
         }
@@ -275,7 +271,7 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void editTextWatcher() {
-        // Only unable the send button when there's text to send
+       // Only unable the send button when there's text to send
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {

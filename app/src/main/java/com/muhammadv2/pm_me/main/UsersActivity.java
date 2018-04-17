@@ -2,7 +2,6 @@ package com.muhammadv2.pm_me.main;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -82,30 +81,27 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
         mUsersReference = mFireBaseDb.getReference().child(mUsersNode);
         mFbAuth = FirebaseAuth.getInstance();
 
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) { // User authorized
-                    addTheUserDataToDb(user);
-                    loadAllAuthUsers();
-                } else { // User not authorized
-                    onSignedOutCleaner();
+        mAuthListener = firebaseAuth -> {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
+            if (user != null) { // User authorized
+                addTheUserDataToDb(user);
+                loadAllAuthUsers();
+            } else { // User not authorized
+                onSignedOutCleaner();
 
-                    // Start the Firebase UI for logging in by email and google provider
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setIsSmartLockEnabled(false)
-                                    .setLogo(R.drawable.app_icon)
-                                    .setAvailableProviders(Arrays.asList(
-                                            new AuthUI.IdpConfig.EmailBuilder().build(),
-                                            new AuthUI.IdpConfig.GoogleBuilder().build()
-                                            // You can add more providers here
-                                    ))
-                                    .build(),
-                            RC_SIGN_IN);
-                }
+                // Start the Firebase UI for logging in by email and google provider
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setIsSmartLockEnabled(false)
+                                .setLogo(R.drawable.app_icon)
+                                .setAvailableProviders(Arrays.asList(
+                                        new AuthUI.IdpConfig.EmailBuilder().build(),
+                                        new AuthUI.IdpConfig.GoogleBuilder().build()
+                                        // You can add more providers here
+                                ))
+                                .build(),
+                        RC_SIGN_IN);
             }
         };
     }
@@ -260,5 +256,4 @@ public class UsersActivity extends AppCompatActivity implements UsersAdapter.OnI
 
         startActivity(intent);
     }
-
 }

@@ -28,7 +28,7 @@ import com.google.firebase.storage.UploadTask;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.main.AuthUser;
-import com.muhammadv2.pm_me.main.UsersActivity;
+import com.muhammadv2.pm_me.main.UsersFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,8 +121,8 @@ public class ChatDetailsActivity extends AppCompatActivity implements View.OnCli
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         if (bundle == null) return;
-        mCurrentUser = bundle.getParcelable(UsersActivity.CURRENT_USER_DATA);
-        mTargetedUser = bundle.getParcelable(UsersActivity.TARGETED_USER_DATA);
+        mCurrentUser = bundle.getParcelable(UsersFragment.CURRENT_USER_DATA);
+        mTargetedUser = bundle.getParcelable(UsersFragment.TARGETED_USER_DATA);
     }
 
     private void updateThePathAccordingIfExistOrNot() {

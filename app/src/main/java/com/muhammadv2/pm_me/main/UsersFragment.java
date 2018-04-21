@@ -1,6 +1,7 @@
 package com.muhammadv2.pm_me.main;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -66,7 +67,8 @@ public class UsersFragment extends Fragment implements UsersAdapter.OnItemClickL
     @BindView(R.id.tv_current_user_name)
     TextView mTvUserName;
 
-    Context mContext = getContext();
+    private Context mContext = getContext();
+    private Activity mActivity;
 
     public UsersFragment() {
         // Required empty public constructor
@@ -86,6 +88,8 @@ public class UsersFragment extends Fragment implements UsersAdapter.OnItemClickL
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if (getActivity() != null) mActivity = getActivity();
+
         mAuthUsers = new ArrayList<>();
 
         FirebaseDatabase mFireBaseDb = FirebaseUtils.getDatabase();
@@ -186,9 +190,8 @@ public class UsersFragment extends Fragment implements UsersAdapter.OnItemClickL
 
     private void setCurrentUserData() {
         mTvUserName.setText(mCurrentUser.getName());
-
         GlideImageHandlingUtils.loadImageIntoView(
-                mContext,
+                mActivity,
                 mCurrentUser.getImageUrl(),
                 mIvUserImage);
     }
@@ -231,7 +234,7 @@ public class UsersFragment extends Fragment implements UsersAdapter.OnItemClickL
         bundle.putParcelable(TARGETED_USER_DATA, currentUser);
         bundle.putParcelable(CURRENT_USER_DATA, mCurrentUser);
 
-        Intent intent = new Intent(mContext, ChatDetailsActivity.class);
+        Intent intent = new Intent(mActivity, ChatDetailsActivity.class);
         intent.putExtras(bundle);
         startActivity(intent);
     }

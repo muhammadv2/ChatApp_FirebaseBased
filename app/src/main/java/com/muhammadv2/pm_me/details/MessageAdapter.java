@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.muhammadv2.pm_me.R;
+import com.muhammadv2.pm_me.model.Message;
 
 import java.util.List;
 

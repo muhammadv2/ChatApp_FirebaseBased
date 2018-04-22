@@ -50,5 +50,7 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:4.7.0'
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    compile 'com.hannesdorfmann.mosby3:mvp-lce:3.1.0'
+
 }
 apply plugin: 'com.google.gms.google-services'

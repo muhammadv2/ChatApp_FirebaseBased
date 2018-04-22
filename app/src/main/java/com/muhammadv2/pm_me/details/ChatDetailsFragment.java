@@ -32,8 +32,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.Utils.FirebaseUtils;
-import com.muhammadv2.pm_me.main.AuthUser;
+import com.muhammadv2.pm_me.model.AuthUser;
 import com.muhammadv2.pm_me.main.UsersFragment;
+import com.muhammadv2.pm_me.model.Message;
 
 import java.util.ArrayList;
 import java.util.List;

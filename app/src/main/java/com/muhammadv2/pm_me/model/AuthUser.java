@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me.main;
+package com.muhammadv2.pm_me.model;
 
 
 import android.os.Parcel;

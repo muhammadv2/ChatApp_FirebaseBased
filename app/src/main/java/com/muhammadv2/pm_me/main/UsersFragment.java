@@ -29,6 +29,7 @@ import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.Utils.GlideImageHandlingUtils;
 import com.muhammadv2.pm_me.details.ChatDetailsActivity;
+import com.muhammadv2.pm_me.model.AuthUser;
 
 import java.util.ArrayList;
 import java.util.Arrays;

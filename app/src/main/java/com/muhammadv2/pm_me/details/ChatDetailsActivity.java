@@ -7,8 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.model.AuthUser;
-import com.muhammadv2.pm_me.main.UsersFragment;
 
+import static com.muhammadv2.pm_me.Constants.TARGETED_USER_DATA;
 import static com.muhammadv2.pm_me.details.ChatDetailsFragment.RC_PHOTO_PICKER;
 
 
@@ -22,7 +22,7 @@ public class ChatDetailsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         Bundle bundle = getIntent().getExtras();
         if (actionBar != null && bundle != null) {
-            AuthUser authUser = bundle.getParcelable(UsersFragment.TARGETED_USER_DATA);
+            AuthUser authUser = bundle.getParcelable(TARGETED_USER_DATA);
             if (authUser == null) return;
             actionBar.setTitle(authUser.getName());
         }

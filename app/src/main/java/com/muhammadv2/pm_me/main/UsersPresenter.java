@@ -9,4 +9,7 @@ abstract class UsersPresenter extends MvpBasePresenter<IUsersView> {
     @UiThread
     public abstract void loadDataIfUserAuthOrShowSignInScreen();
 
+    @UiThread
+    public abstract void getChatUsers(int position);
+
 }

@@ -10,18 +10,16 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.muhammadv2.pm_me.R;
 
-import static com.muhammadv2.pm_me.main.UsersFragment.RC_SIGN_IN;
+import static com.muhammadv2.pm_me.Constants.RC_SIGN_IN;
 
 //Todo when clone this project you have to add your own google-services file from your google account to the app directory
 
 public class UsersActivity extends AppCompatActivity {
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
-
     }
 
     @Override

@@ -14,4 +14,7 @@ interface IUsersView extends MvpLceView<List<AuthUser>> {
 
     @UiThread
     void showCurrentUserInfo(String name, String imageUrl);
+
+    @UiThread
+    void navigateChatDetails(AuthUser currentUser, AuthUser targetedUser);
 }

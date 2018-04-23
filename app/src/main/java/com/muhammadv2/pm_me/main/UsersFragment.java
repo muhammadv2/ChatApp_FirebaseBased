@@ -1,7 +1,6 @@
 package com.muhammadv2.pm_me.main;
 
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,13 +26,11 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.muhammadv2.pm_me.Constants.RC_SIGN_IN;
+
 public class UsersFragment
         extends MvpLceFragment<CoordinatorLayout, List<AuthUser>, IUsersView, UsersPresenterImp>
         implements IUsersView, UsersAdapter.OnItemClickLister {
-
-    public static final int RC_SIGN_IN = 305;
-    public static final String CURRENT_USER_DATA = "currentUid";
-    public static final String TARGETED_USER_DATA = "chooseUid";
 
     @BindView(R.id.contentView)
     RecyclerView mUsersRV;
@@ -43,7 +40,6 @@ public class UsersFragment
     @BindView(R.id.tv_current_user_name)
     TextView mTvUserName;
 
-    private Context mContext = getContext();
     private RootCoordinator coordinator;
 
     private UsersPresenterImp usersPresenter = new UsersPresenterImp(this);
@@ -85,7 +81,7 @@ public class UsersFragment
 
     private void attachUI(List<AuthUser> authUsers) {
         mUsersRV.setHasFixedSize(true);
-        mUsersRV.setLayoutManager(new LinearLayoutManager(mContext));
+        mUsersRV.setLayoutManager(new LinearLayoutManager(getContext()));
         mUsersAdapter = new UsersAdapter(authUsers, this);
         mUsersRV.setAdapter(mUsersAdapter);
     }
@@ -104,17 +100,13 @@ public class UsersFragment
 
     @Override
     public void onClick(int position) {
+        presenter.getChatUsers(position);
+    }
 
-//        coordinator.handleOnTargetUserClicked();
-//        AuthUser currentUser = mAuthUsers.get(position);
-//        Bundle bundle = new Bundle();
-//
-//        bundle.putParcelable(TARGETED_USER_DATA, currentUser);
-//        bundle.putParcelable(CURRENT_USER_DATA, mCurrentUser);
-//
-//        Intent intent = new Intent(mActivity, ChatDetailsActivity.class);
-//        intent.putExtras(bundle);
-//        startActivity(intent);
+    @Override
+    public void navigateChatDetails(AuthUser currentUser, AuthUser targetedUser) {
+        coordinator.handleOnTargetUserClicked(getContext(), currentUser, targetedUser);
+
     }
 
     @Override

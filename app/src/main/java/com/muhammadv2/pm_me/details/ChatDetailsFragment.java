@@ -30,10 +30,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.muhammadv2.pm_me.Constants;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.model.AuthUser;
-import com.muhammadv2.pm_me.main.UsersFragment;
 import com.muhammadv2.pm_me.model.Message;
 
 import java.util.ArrayList;
@@ -147,8 +147,8 @@ public class ChatDetailsFragment extends Fragment implements View.OnClickListene
         Intent intent = mActivity.getIntent();
         Bundle bundle = intent.getExtras();
         if (bundle == null) return;
-        mCurrentUser = bundle.getParcelable(UsersFragment.CURRENT_USER_DATA);
-        mTargetedUser = bundle.getParcelable(UsersFragment.TARGETED_USER_DATA);
+        mCurrentUser = bundle.getParcelable(Constants.CURRENT_USER_DATA);
+        mTargetedUser = bundle.getParcelable(Constants.TARGETED_USER_DATA);
     }
 
     private void updateThePathAccordingIfExistOrNot() {

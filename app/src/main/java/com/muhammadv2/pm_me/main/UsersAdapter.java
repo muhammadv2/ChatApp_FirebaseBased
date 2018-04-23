@@ -18,7 +18,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
+public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder>{
 
     private List<AuthUser> mAuthUsers;
 

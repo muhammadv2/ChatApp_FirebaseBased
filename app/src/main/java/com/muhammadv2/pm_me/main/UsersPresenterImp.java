@@ -53,6 +53,11 @@ public class UsersPresenterImp extends UsersPresenter {
         };
     }
 
+    @Override
+    public void getChatUsers(int position) {
+        view.navigateChatDetails(mCurrentUser, mAuthUsers.get(position));
+    }
+
 
     /**
      * @param authUser we extract the user info as user id and name and then populate the AuthUser
@@ -86,9 +91,7 @@ public class UsersPresenterImp extends UsersPresenter {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Called every time data changes and when the first attach happen
-                mAuthUsers.clear(); // First clear all data to prevent duplication
                 addAllUserToTheList(dataSnapshot);
-                view.setData(mAuthUsers);
             }
 
             @Override
@@ -104,7 +107,7 @@ public class UsersPresenterImp extends UsersPresenter {
      *                     user and skip adding him and add only all other users in the list
      */
     private void addAllUserToTheList(DataSnapshot dataSnapshot) {
-
+        mAuthUsers.clear(); // First clear all data to prevent duplication
         for (DataSnapshot singleChild : dataSnapshot.getChildren()) {
             if (!mCurrentUserKey.equals(singleChild.getKey())) {
                 AuthUser authUser = singleChild.getValue(AuthUser.class);
@@ -117,6 +120,7 @@ public class UsersPresenterImp extends UsersPresenter {
                 view.showCurrentUserInfo(mCurrentUser.getName(), mCurrentUser.getImageUrl());
             }
         }
+        view.setData(mAuthUsers);
     }
 
 

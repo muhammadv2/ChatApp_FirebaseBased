@@ -67,6 +67,15 @@
             android:nestedScrollingEnabled="true"
             tools:targetApi="lollipop" />
 
+        <TextView
+            android:id="@+id/errorView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/error_load_users"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:visibility="gone" />
+
     </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>

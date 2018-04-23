@@ -7,8 +7,6 @@ import com.hannesdorfmann.mosby3.mvp.MvpBasePresenter;
 abstract class UsersPresenter extends MvpBasePresenter<IUsersView> {
 
     @UiThread
-    public abstract void loadData();
+    public abstract void loadDataIfUserAuthOrShowSignInScreen();
 
-    @UiThread
-    public abstract void verifyAuthenticatio();
 }

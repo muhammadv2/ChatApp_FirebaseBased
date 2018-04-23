@@ -13,19 +13,16 @@ import com.muhammadv2.pm_me.model.AuthUser;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is to show a list of authenticated users by firstly fire
+ * {@link #mAuthListener} to find if the current user is registered if not redirect him to sign up
+ * screen if yes then load the list of the users by calling this method {@link #loadAllAuthUsers()}
+ * and also make sure to add the current user  {@link #addAllUserToTheList(DataSnapshot)}
+ */
 public class UsersPresenterImp extends UsersPresenter {
 
     private IUsersView view;
     private static final String mUsersNode = "users";
-
-
-    UsersPresenterImp(IUsersView mvpFragment) {
-        view = mvpFragment;
-        FirebaseDatabase mFireBaseDb = FirebaseUtils.getDatabase();
-        mUsersReference = mFireBaseDb.getReference().child(mUsersNode);
-        mFbAuth = FirebaseAuth.getInstance();
-        mAuthUsers = new ArrayList<>();
-    }
 
     private DatabaseReference mUsersReference;
     private FirebaseAuth mFbAuth;
@@ -35,8 +32,15 @@ public class UsersPresenterImp extends UsersPresenter {
     private String mCurrentUserKey;
     private AuthUser mCurrentUser;
 
-    public void loadData() {
+    UsersPresenterImp(IUsersView mvpFragment) {
+        view = mvpFragment;
+        FirebaseDatabase mFireBaseDb = FirebaseUtils.getDatabase();
+        mUsersReference = mFireBaseDb.getReference().child(mUsersNode);
+        mFbAuth = FirebaseAuth.getInstance();
+        mAuthUsers = new ArrayList<>();
+    }
 
+    public void loadDataIfUserAuthOrShowSignInScreen() {
         mAuthListener = firebaseAuth -> {
             FirebaseUser user = firebaseAuth.getCurrentUser();
             if (user != null) { // User authorized
@@ -89,13 +93,12 @@ public class UsersPresenterImp extends UsersPresenter {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                view.showError(databaseError.toException(), false);
             }
         });
     }
 
     /**
-     * Loop on DataSnapshot that holds all the node data
+     * Loop on DataSnapshot that holds all message node data
      *
      * @param dataSnapshot by getting the whole children the object holds we can find the current
      *                     user and skip adding him and add only all other users in the list
@@ -111,7 +114,7 @@ public class UsersPresenterImp extends UsersPresenter {
             } else {
                 mCurrentUser = singleChild.getValue(AuthUser.class);
                 mCurrentUser.setUid(singleChild.getKey());
-                setCurrentUserData();
+                view.showCurrentUserInfo(mCurrentUser.getName(), mCurrentUser.getImageUrl());
             }
         }
     }
@@ -122,8 +125,8 @@ public class UsersPresenterImp extends UsersPresenter {
     }
 
     private void detachDatabaseListener() {
-        if (mUsersAdapter != null)
-            mUsersAdapter.clear();
+//        if (mUsersAdapter != null)
+//            mUsersAdapter.clear();
     }
 
 

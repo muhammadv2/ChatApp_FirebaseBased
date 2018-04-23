@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.firebase.ui.auth.AuthUI;
 import com.muhammadv2.pm_me.R;
 
 import static com.muhammadv2.pm_me.main.UsersFragment.RC_SIGN_IN;
@@ -33,7 +34,7 @@ public class UsersActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sign_out_btn:
-                UsersFragment.signUserOut(this);
+                AuthUI.getInstance().signOut(this); // Sign out from Auth as simple as that
         }
         return super.onOptionsItemSelected(item);
     }

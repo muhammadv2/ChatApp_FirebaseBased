@@ -13,5 +13,5 @@ interface IUsersView extends MvpLceView<List<AuthUser>> {
     void showSignIn();
 
     @UiThread
-    void showCurrentUserInfo();
+    void showCurrentUserInfo(String name, String imageUrl);
 }

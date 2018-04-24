@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me.components.users;
+package com.muhammadv2.pm_me.ui.users;
 
 import android.support.annotation.UiThread;
 

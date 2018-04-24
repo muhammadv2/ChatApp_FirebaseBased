@@ -10,9 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".component.details.ChatDetailsActivity"
-            android:parentActivityName=".component.users.UsersActivity" />
-        <activity android:name=".component.users.UsersActivity">
+            android:name=".ui.details.ChatDetailsActivity"
+            android:parentActivityName=".ui.users.UsersActivity" />
+        <activity android:name=".ui.users.UsersActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

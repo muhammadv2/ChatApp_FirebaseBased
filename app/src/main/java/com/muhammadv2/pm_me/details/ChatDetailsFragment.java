@@ -43,6 +43,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
+import static android.app.Activity.RESULT_OK;
+
 /**
  * This class is to show messages between users separately the logic is a bit complicated but this
  * was is the best i could get
@@ -104,6 +106,7 @@ public class ChatDetailsFragment extends Fragment implements View.OnClickListene
         setRetainInstance(true);
         View view = inflater.inflate(R.layout.fragment_chat_details, container, false);
         ButterKnife.bind(this, view);
+        Timber.plant(new Timber.DebugTree());
 
         // Inflate the layout for this fragment
         return view;
@@ -126,15 +129,14 @@ public class ChatDetailsFragment extends Fragment implements View.OnClickListene
         // Set some restrictions over the user input
         editTextWatcher();
 
-        mMessagesDbRef = FirebaseUtils.getDatabase().getReference().child(MESSAGES_NODE_DB);
-        mStorageRef = FirebaseStorage.getInstance().getReference().child(PHOTOS_DATA_STORAGE);
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        mMessagesDbRef = FirebaseUtils.getDatabase().getReference().child(MESSAGES_NODE_DB);
+        mStorageRef = FirebaseStorage.getInstance().getReference().child(PHOTOS_DATA_STORAGE);
         updateThePathAccordingIfExistOrNot();
-
     }
 
     @Override
@@ -296,6 +298,16 @@ public class ChatDetailsFragment extends Fragment implements View.OnClickListene
         // Set maximum length for a single message not exceed 1000.
         mMessageEditText.setFilters(new InputFilter[]{
                 new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ChatDetailsFragment.RC_PHOTO_PICKER) {
+            if (resultCode == RESULT_OK) {
+                handleSelectedImage(data);
+            }
+        }
     }
 
     public void handleSelectedImage(Intent data) {

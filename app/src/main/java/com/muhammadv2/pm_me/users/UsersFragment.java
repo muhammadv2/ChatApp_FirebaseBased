@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me.main;
+package com.muhammadv2.pm_me.users;
 
 
 import android.os.Bundle;
@@ -106,7 +106,6 @@ public class UsersFragment
     @Override
     public void navigateChatDetails(AuthUser currentUser, AuthUser targetedUser) {
         coordinator.handleOnTargetUserClicked(getContext(), currentUser, targetedUser);
-
     }
 
     @Override

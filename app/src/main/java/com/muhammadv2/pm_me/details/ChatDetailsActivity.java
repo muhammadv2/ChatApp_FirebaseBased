@@ -9,7 +9,6 @@ import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.model.AuthUser;
 
 import static com.muhammadv2.pm_me.Constants.TARGETED_USER_DATA;
-import static com.muhammadv2.pm_me.details.ChatDetailsFragment.RC_PHOTO_PICKER;
 
 
 public class ChatDetailsActivity extends AppCompatActivity {
@@ -31,12 +30,6 @@ public class ChatDetailsActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
-            ChatDetailsFragment chatDetailsFragment = new ChatDetailsFragment();
-            chatDetailsFragment.handleSelectedImage(data);
-        }
-
     }
 
 }

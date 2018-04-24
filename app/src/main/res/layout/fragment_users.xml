@@ -5,19 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/lightBackGround"
-    tools:context="com.muhammadv2.pm_me.main.UsersActivity">
+    tools:context="com.muhammadv2.pm_me.users.UsersActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_112"
-        android:background="@color/colorPrimary"
         app:layout_behavior="com.muhammadv2.pm_me.FixAppBarLayoutBehavior">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_8"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <LinearLayout
@@ -52,7 +52,9 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:nestedScrollingEnabled="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:targetApi="lollipop">
 
         <android.support.v4.widget.ContentLoadingProgressBar
             android:id="@+id/loadingView"
@@ -64,8 +66,7 @@
             android:id="@+id/contentView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="true"
-            tools:targetApi="lollipop" />
+            android:nestedScrollingEnabled="true" />
 
         <TextView
             android:id="@+id/errorView"

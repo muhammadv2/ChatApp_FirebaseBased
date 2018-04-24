@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me.main;
+package com.muhammadv2.pm_me.users;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -57,7 +57,6 @@ public class UsersPresenterImp extends UsersPresenter {
     public void getChatUsers(int position) {
         view.navigateChatDetails(mCurrentUser, mAuthUsers.get(position));
     }
-
 
     /**
      * @param authUser we extract the user info as user id and name and then populate the AuthUser

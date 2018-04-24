@@ -11,8 +11,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".details.ChatDetailsActivity"
-            android:parentActivityName=".main.UsersActivity" />
-        <activity android:name=".main.UsersActivity">
+            android:parentActivityName=".users.UsersActivity" />
+        <activity android:name=".users.UsersActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

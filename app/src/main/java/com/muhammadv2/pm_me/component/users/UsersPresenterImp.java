@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me.users;
+package com.muhammadv2.pm_me.component.users;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -21,7 +21,6 @@ import java.util.List;
  */
 public class UsersPresenterImp extends UsersPresenter {
 
-    private IUsersView view;
     private static final String mUsersNode = "users";
 
     private DatabaseReference mUsersReference;
@@ -32,8 +31,7 @@ public class UsersPresenterImp extends UsersPresenter {
     private String mCurrentUserKey;
     private AuthUser mCurrentUser;
 
-    UsersPresenterImp(IUsersView mvpFragment) {
-        view = mvpFragment;
+    UsersPresenterImp() {
         FirebaseDatabase mFireBaseDb = FirebaseUtils.getDatabase();
         mUsersReference = mFireBaseDb.getReference().child(mUsersNode);
         mFbAuth = FirebaseAuth.getInstance();
@@ -48,14 +46,14 @@ public class UsersPresenterImp extends UsersPresenter {
                 loadAllAuthUsers();
             } else { // User not authorized
                 onSignedOutCleaner();
-                view.showSignIn();
+                getView().showSignIn();
             }
         };
     }
 
     @Override
     public void getChatUsers(int position) {
-        view.navigateChatDetails(mCurrentUser, mAuthUsers.get(position));
+        getView().navigateChatDetails(mCurrentUser, mAuthUsers.get(position));
     }
 
     /**
@@ -116,20 +114,15 @@ public class UsersPresenterImp extends UsersPresenter {
             } else {
                 mCurrentUser = singleChild.getValue(AuthUser.class);
                 mCurrentUser.setUid(singleChild.getKey());
-                view.showCurrentUserInfo(mCurrentUser.getName(), mCurrentUser.getImageUrl());
+                getView().showCurrentUserInfo(mCurrentUser.getName(), mCurrentUser.getImageUrl());
             }
         }
-        view.setData(mAuthUsers);
+        getView().setData(mAuthUsers);
     }
 
 
     private void onSignedOutCleaner() {
-        detachDatabaseListener();
-    }
-
-    private void detachDatabaseListener() {
-//        if (mUsersAdapter != null)
-//            mUsersAdapter.clear();
+        getView().clearAdapter();
     }
 
 
@@ -140,6 +133,5 @@ public class UsersPresenterImp extends UsersPresenter {
     public void detachListeners() {
         if (mFbAuth != null)
             mFbAuth.removeAuthStateListener(mAuthListener);
-        detachDatabaseListener();
     }
 }

@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me.users;
+package com.muhammadv2.pm_me.component.users;
 
 import android.support.annotation.UiThread;
 
@@ -17,4 +17,7 @@ interface IUsersView extends MvpLceView<List<AuthUser>> {
 
     @UiThread
     void navigateChatDetails(AuthUser currentUser, AuthUser targetedUser);
+
+    @UiThread
+    void clearAdapter();
 }

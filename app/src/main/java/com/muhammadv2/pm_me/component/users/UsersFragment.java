@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me.users;
+package com.muhammadv2.pm_me.component.users;
 
 
 import android.os.Bundle;
@@ -42,8 +42,6 @@ public class UsersFragment
 
     private RootCoordinator coordinator;
 
-    private UsersPresenterImp usersPresenter = new UsersPresenterImp(this);
-
     public UsersFragment() {
         // Required empty public constructor
     }
@@ -51,7 +49,7 @@ public class UsersFragment
     @NonNull
     @Override
     public UsersPresenterImp createPresenter() {
-        return usersPresenter;
+        return new UsersPresenterImp();
     }
 
     @Override
@@ -90,12 +88,7 @@ public class UsersFragment
     public void onResume() {
         super.onResume();
         presenter.setAuthStateListener();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        presenter.detachListeners();
+        presenter.attachView(this);
     }
 
     @Override
@@ -137,5 +130,23 @@ public class UsersFragment
                 getActivity(),
                 imageUrl,
                 mIvUserImage);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        presenter.detachListeners();
+        presenter.detachView();
+    }
+
+    public void clearAdapter() {
+        if (mUsersAdapter != null)
+            mUsersAdapter.clear();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.destroy();
     }
 }

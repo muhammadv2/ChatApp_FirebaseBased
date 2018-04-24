@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me.component.users;
+package com.muhammadv2.pm_me.components.users;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -19,7 +19,7 @@ import java.util.List;
  * screen if yes then load the list of the users by calling this method {@link #loadAllAuthUsers()}
  * and also make sure to add the current user  {@link #addAllUserToTheList(DataSnapshot)}
  */
-public class UsersPresenterImp extends UsersPresenter {
+public class UsersPresenter extends IUserPresenter {
 
     private static final String mUsersNode = "users";
 
@@ -31,14 +31,14 @@ public class UsersPresenterImp extends UsersPresenter {
     private String mCurrentUserKey;
     private AuthUser mCurrentUser;
 
-    UsersPresenterImp() {
+    UsersPresenter() {
         FirebaseDatabase mFireBaseDb = FirebaseUtils.getDatabase();
         mUsersReference = mFireBaseDb.getReference().child(mUsersNode);
         mFbAuth = FirebaseAuth.getInstance();
         mAuthUsers = new ArrayList<>();
     }
 
-    public void loadDataIfUserAuthOrShowSignInScreen() {
+    public void loadDataIfUserAuthOrShowSignScreen() {
         mAuthListener = firebaseAuth -> {
             FirebaseUser user = firebaseAuth.getCurrentUser();
             if (user != null) { // User authorized

@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me.component.users;
+package com.muhammadv2.pm_me.components.users;
 
 
 import android.os.Bundle;
@@ -13,23 +13,19 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.firebase.ui.auth.AuthUI;
 import com.hannesdorfmann.mosby3.mvp.lce.MvpLceFragment;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.Utils.GlideImageHandlingUtils;
 import com.muhammadv2.pm_me.coordinator.RootCoordinator;
 import com.muhammadv2.pm_me.model.AuthUser;
 
-import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.muhammadv2.pm_me.Constants.RC_SIGN_IN;
-
 public class UsersFragment
-        extends MvpLceFragment<CoordinatorLayout, List<AuthUser>, IUsersView, UsersPresenterImp>
+        extends MvpLceFragment<CoordinatorLayout, List<AuthUser>, IUsersView, UsersPresenter>
         implements IUsersView, UsersAdapter.OnItemClickLister {
 
     @BindView(R.id.contentView)
@@ -48,8 +44,8 @@ public class UsersFragment
 
     @NonNull
     @Override
-    public UsersPresenterImp createPresenter() {
-        return new UsersPresenterImp();
+    public UsersPresenter createPresenter() {
+        return new UsersPresenter();
     }
 
     @Override
@@ -69,7 +65,7 @@ public class UsersFragment
 
     @Override
     public void loadData(boolean pullToRefresh) {
-        presenter.loadDataIfUserAuthOrShowSignInScreen();
+        presenter.loadDataIfUserAuthOrShowSignScreen();
     }
 
     @Override
@@ -109,18 +105,7 @@ public class UsersFragment
     @Override
     public void showSignIn() {
         // Start the Firebase UI for logging in by email and google provider
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setIsSmartLockEnabled(false)
-                        .setLogo(R.drawable.app_icon)
-                        .setAvailableProviders(Arrays.asList(
-                                new AuthUI.IdpConfig.EmailBuilder().build(),
-                                new AuthUI.IdpConfig.GoogleBuilder().build()
-                                // You can add more providers here
-                        ))
-                        .build(),
-                RC_SIGN_IN);
+        coordinator.handleOpeningAuthSign(getActivity());
     }
 
     @Override

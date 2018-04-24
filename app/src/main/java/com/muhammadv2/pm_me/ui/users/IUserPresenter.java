@@ -1,12 +1,12 @@
-package com.muhammadv2.pm_me.component.users;
+package com.muhammadv2.pm_me.components.users;
 
 import android.support.annotation.UiThread;
 
 import com.hannesdorfmann.mosby3.mvp.MvpNullObjectBasePresenter;
 
-abstract class UsersPresenter extends MvpNullObjectBasePresenter<IUsersView> {
+abstract class IUserPresenter extends MvpNullObjectBasePresenter<IUsersView> {
 
-    public abstract void loadDataIfUserAuthOrShowSignInScreen();
+    public abstract void loadDataIfUserAuthOrShowSignScreen();
 
     @UiThread
     public abstract void getChatUsers(int position);

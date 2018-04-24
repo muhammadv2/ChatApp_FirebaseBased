@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me.component.details;
+package com.muhammadv2.pm_me.components.details;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;

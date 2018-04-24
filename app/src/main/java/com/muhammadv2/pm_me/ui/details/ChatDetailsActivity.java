@@ -1,4 +1,4 @@
-package com.muhammadv2.pm_me.component.details;
+package com.muhammadv2.pm_me.components.details;
 
 import android.content.Intent;
 import android.os.Bundle;

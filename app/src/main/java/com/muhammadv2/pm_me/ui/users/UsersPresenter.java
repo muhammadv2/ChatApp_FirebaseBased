@@ -13,12 +13,6 @@ import com.muhammadv2.pm_me.model.AuthUser;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This class is to show a list of authenticated users by firstly fire
- * {@link #mAuthListener} to find if the current user is registered if not redirect him to sign up
- * screen if yes then load the list of the users by calling this method {@link #loadAllAuthUsers()}
- * and also make sure to add the current user  {@link #addAllUserToTheList(DataSnapshot)}
- */
 public class UsersPresenter extends IUserPresenter {
 
     private static final String mUsersNode = "users";

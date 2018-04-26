@@ -16,7 +16,7 @@ import static com.muhammadv2.pm_me.Constants.CURRENT_USER_DATA;
 import static com.muhammadv2.pm_me.Constants.RC_SIGN_IN;
 import static com.muhammadv2.pm_me.Constants.TARGETED_USER_DATA;
 
-public class RootCoordinator {
+public class Navigator {
 
     public void handleOpeningAuthSign(Activity context) {
         context.startActivityForResult(

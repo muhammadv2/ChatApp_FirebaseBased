@@ -16,7 +16,7 @@ import android.widget.TextView;
 import com.hannesdorfmann.mosby3.mvp.lce.MvpLceFragment;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.Utils.GlideImageHandlingUtils;
-import com.muhammadv2.pm_me.coordinator.RootCoordinator;
+import com.muhammadv2.pm_me.coordinator.Navigator;
 import com.muhammadv2.pm_me.model.AuthUser;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class UsersFragment
     @BindView(R.id.tv_current_user_name)
     TextView mTvUserName;
 
-    private RootCoordinator coordinator;
+    private Navigator navigator;
 
     public UsersFragment() {
         // Required empty public constructor
@@ -59,7 +59,7 @@ public class UsersFragment
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         setRetainInstance(true);
-        coordinator = new RootCoordinator();
+        navigator = new Navigator();
         loadData(false);
     }
 
@@ -94,7 +94,7 @@ public class UsersFragment
 
     @Override
     public void navigateChatDetails(AuthUser currentUser, AuthUser targetedUser) {
-        coordinator.handleOnTargetUserClicked(getContext(), currentUser, targetedUser);
+        navigator.handleOnTargetUserClicked(getContext(), currentUser, targetedUser);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class UsersFragment
     @Override
     public void showSignIn() {
         // Start the Firebase UI for logging in by email and google provider
-        coordinator.handleOpeningAuthSign(getActivity());
+        navigator.handleOpeningAuthSign(getActivity());
     }
 
     @Override

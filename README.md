@@ -8,6 +8,8 @@
 
 ## Getting Started
 
+**Stage2 is still under development**
+
 To start using the sample just clone the project and add your own copy of  google-services file from your google account to the app
 directory [There is how start using firebase guide](https://firebase.google.com/docs/android/setup) 
 

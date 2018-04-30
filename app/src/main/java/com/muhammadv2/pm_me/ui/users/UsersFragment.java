@@ -89,7 +89,7 @@ public class UsersFragment
 
     @Override
     public void onClick(int position) {
-        presenter.getChatUsers(position);
+        presenter.onTargetUserClicked(position);
     }
 
     @Override

@@ -46,7 +46,7 @@ public class UsersPresenter extends IUserPresenter {
     }
 
     @Override
-    public void getChatUsers(int position) {
+    public void onTargetUserClicked(int position) {
         getView().navigateChatDetails(mCurrentUser, mAuthUsers.get(position));
     }
 

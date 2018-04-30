@@ -9,7 +9,7 @@ abstract class IUserPresenter extends MvpNullObjectBasePresenter<IUsersView> {
     public abstract void loadDataIfUserAuthOrShowSignScreen();
 
     @UiThread
-    public abstract void getChatUsers(int position);
+    public abstract void onTargetUserClicked(int position);
 
     @UiThread
     public abstract void setAuthStateListener();

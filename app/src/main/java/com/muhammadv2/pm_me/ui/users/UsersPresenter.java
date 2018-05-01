@@ -9,9 +9,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.model.AuthUser;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import java9.util.function.Consumer;
 
 public class UsersPresenter extends IUserPresenter {
 
@@ -32,12 +33,12 @@ public class UsersPresenter extends IUserPresenter {
         mAuthUsers = new ArrayList<>();
     }
 
-    public void loadDataIfUserAuthOrShowSignScreen() {
-        mAuthListener = firebaseAuth -> {
+    public void loadData(Consumer<List<AuthUser>> onNewResult) {
+            mAuthListener = firebaseAuth -> {
             FirebaseUser user = firebaseAuth.getCurrentUser();
             if (user != null) { // User authorized
                 addTheUserDataToDb(user);
-                loadAllAuthUsers();
+                loadAllAuthUsers(onNewResult);
             } else { // User not authorized
                 onSignedOutCleaner();
                 getView().showSignIn();
@@ -72,17 +73,26 @@ public class UsersPresenter extends IUserPresenter {
         mUsersReference.child(mCurrentUserKey).setValue(user);
     }
 
-    /**
-     * Extract all the users stored in the database to show them as a list and prevent duplicate
-     * the users by checking the unique key before adding
-     */
-    private void loadAllAuthUsers() {
+    private void loadAllAuthUsers(Consumer<List<AuthUser>> onNewResult) {
 
         mUsersReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Called every time data changes and when the first attach happen
-                addAllUserToTheList(dataSnapshot);
+                mAuthUsers.clear(); // First clear all data to prevent duplication
+                for (DataSnapshot singleChild : dataSnapshot.getChildren()) {
+                    if (!mCurrentUserKey.equals(singleChild.getKey())) {
+                        AuthUser authUser = singleChild.getValue(AuthUser.class);
+                        if (authUser != null)
+                            authUser.setUid(singleChild.getKey());
+                        mAuthUsers.add(authUser);
+                    } else {
+                        mCurrentUser = singleChild.getValue(AuthUser.class);
+                        mCurrentUser.setUid(singleChild.getKey());
+                        getView().showCurrentUserInfo(mCurrentUser.getName(), mCurrentUser.getImageUrl());
+                    }
+                }
+                onNewResult.accept(mAuthUsers);
             }
 
             @Override
@@ -90,30 +100,6 @@ public class UsersPresenter extends IUserPresenter {
             }
         });
     }
-
-    /**
-     * Loop on DataSnapshot that holds all message node data
-     *
-     * @param dataSnapshot by getting the whole children the object holds we can find the current
-     *                     user and skip adding him and add only all other users in the list
-     */
-    private void addAllUserToTheList(DataSnapshot dataSnapshot) {
-        mAuthUsers.clear(); // First clear all data to prevent duplication
-        for (DataSnapshot singleChild : dataSnapshot.getChildren()) {
-            if (!mCurrentUserKey.equals(singleChild.getKey())) {
-                AuthUser authUser = singleChild.getValue(AuthUser.class);
-                if (authUser != null)
-                    authUser.setUid(singleChild.getKey());
-                mAuthUsers.add(authUser);
-            } else {
-                mCurrentUser = singleChild.getValue(AuthUser.class);
-                mCurrentUser.setUid(singleChild.getKey());
-                getView().showCurrentUserInfo(mCurrentUser.getName(), mCurrentUser.getImageUrl());
-            }
-        }
-        getView().setData(mAuthUsers);
-    }
-
 
     private void onSignedOutCleaner() {
         getView().clearAdapter();

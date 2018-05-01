@@ -65,7 +65,7 @@ public class UsersFragment
 
     @Override
     public void loadData(boolean pullToRefresh) {
-        presenter.loadDataIfUserAuthOrShowSignScreen();
+        presenter.loadData(this::attachUI);
     }
 
     @Override

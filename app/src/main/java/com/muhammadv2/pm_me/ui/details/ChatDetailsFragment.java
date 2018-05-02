@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -30,6 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.hannesdorfmann.mosby3.mvp.lce.MvpLceFragment;
 import com.muhammadv2.pm_me.Constants;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.Utils.FirebaseUtils;
@@ -45,23 +46,9 @@ import timber.log.Timber;
 
 import static android.app.Activity.RESULT_OK;
 
-/**
- * This class is to show messages between users separately the logic is a bit complicated but this
- * was is the best i could get
- * <p>
- * 1. {@link #updateThePathAccordingIfExistOrNot()} First we have to listen to the exists messages
- * node in the database to find if the keys from current user and targeted user exists there if it
- * exists we will keep the key to use it again to push and not duplicate keys if not will simply
- * create a new one
- * <p>
- * 2. {@link #retrieveAndSaveChatData()} Will be called after make sure we have a path
- * either new or exists and will populate the message object directly with the coming data no need
- * to iterate because {@link #mChildListener} read the node children directly
- * <p>
- * 3. Finally push when the send button is clicked if a normal message and when back from picking
- * and image basically by using our updated path of {@link #mUsersChatDbRef}
- */
-public class ChatDetailsFragment extends Fragment implements View.OnClickListener {
+public class ChatDetailsFragment extends
+        MvpLceFragment<CoordinatorLayout, List<Message>, IChatDetailsView, ChatDetailsPresenter>
+        implements View.OnClickListener {
 
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
     public static final int RC_PHOTO_PICKER = 909;
@@ -79,19 +66,6 @@ public class ChatDetailsFragment extends Fragment implements View.OnClickListene
     @BindView(R.id.btn_send_msg)
     Button mSendButton;
 
-    // Fire base instances
-    private DatabaseReference mUsersChatDbRef;
-    private DatabaseReference mMessagesDbRef;
-    private ChildEventListener mChildListener;
-    private StorageReference mStorageRef;
-
-    private List<Message> messageList; // List to hold all the messages retrieved from the db
-
-    private AuthUser mCurrentUser;
-    private AuthUser mTargetedUser;
-
-    private String existsPath;
-
     private Context mContext = getContext();
     private Activity mActivity;
 
@@ -99,22 +73,26 @@ public class ChatDetailsFragment extends Fragment implements View.OnClickListene
         // Required empty public constructor
     }
 
+    @Override
+    public ChatDetailsPresenter createPresenter() {
+        return new ChatDetailsPresenter();
+    }
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setRetainInstance(true);
-        View view = inflater.inflate(R.layout.fragment_chat_details, container, false);
-        ButterKnife.bind(this, view);
-        Timber.plant(new Timber.DebugTree());
-
         // Inflate the layout for this fragment
-        return view;
+        return inflater.inflate(R.layout.fragment_chat_details, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        setRetainInstance(true);
+        ButterKnife.bind(this, view);
+        Timber.plant(new Timber.DebugTree());
 
         mActivity = getActivity();
         saveDataComingWithIntent();
@@ -124,11 +102,13 @@ public class ChatDetailsFragment extends Fragment implements View.OnClickListene
         mSendButton.setOnClickListener(this);
         mSendButton.setEnabled(false);
 
-        messageList = new ArrayList<>();
-
         // Set some restrictions over the user input
         editTextWatcher();
+    }
 
+    @Override
+    protected String getErrorMessage(Throwable e, boolean pullToRefresh) {
+        return null;
     }
 
     @Override
@@ -187,40 +167,7 @@ public class ChatDetailsFragment extends Fragment implements View.OnClickListene
                 && singleKey.contains(mTargetedUser.getUid());
     }
 
-    private void retrieveAndSaveChatData() {
-        mChildListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Message message = dataSnapshot.getValue(Message.class);
-                messageList.add(message);
-                instantiateRecyclerView();
-            }
 
-            //region unused
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                //Todo called if the data already in the db has been changed
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                //Todo called when the db data has been deleted
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                //Todo called when the data has been moved to another node (json object in db)
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                //Todo Called when there's an error most of the time there's no authentication
-            }
-            //endregion
-        };
-        mUsersChatDbRef.addChildEventListener(mChildListener);
-    }
 
     private void instantiateRecyclerView() {
         mMessageRv.setHasFixedSize(true);
@@ -326,5 +273,15 @@ public class ChatDetailsFragment extends Fragment implements View.OnClickListene
                 mUsersChatDbRef.push().setValue(message);
             });
         }
+    }
+
+    @Override
+    public void setData(List<Message> data) {
+
+    }
+
+    @Override
+    public void loadData(boolean pullToRefresh) {
+
     }
 }

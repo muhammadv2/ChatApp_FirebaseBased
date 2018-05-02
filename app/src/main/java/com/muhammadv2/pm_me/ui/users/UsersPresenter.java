@@ -7,14 +7,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.hannesdorfmann.mosby3.mvp.MvpNullObjectBasePresenter;
 import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.model.AuthUser;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import java9.util.function.Consumer;
 
-public class UsersPresenter extends IUserPresenter {
+public class UsersPresenter extends MvpNullObjectBasePresenter<IUsersView> {
 
     private static final String mUsersNode = "users";
 
@@ -34,7 +36,7 @@ public class UsersPresenter extends IUserPresenter {
     }
 
     public void loadData(Consumer<List<AuthUser>> onNewResult) {
-            mAuthListener = firebaseAuth -> {
+        mAuthListener = firebaseAuth -> {
             FirebaseUser user = firebaseAuth.getCurrentUser();
             if (user != null) { // User authorized
                 addTheUserDataToDb(user);
@@ -46,7 +48,6 @@ public class UsersPresenter extends IUserPresenter {
         };
     }
 
-    @Override
     public void onTargetUserClicked(int position) {
         getView().navigateChatDetails(mCurrentUser, mAuthUsers.get(position));
     }

@@ -1,17 +1,23 @@
 package com.muhammadv2.pm_me.ui.details;
 
+import android.net.Uri;
+
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.hannesdorfmann.mosby3.mvp.MvpNullObjectBasePresenter;
+import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.model.AuthUser;
 import com.muhammadv2.pm_me.model.Message;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView>{
+class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> {
 
 
     // Fire base instances
@@ -26,6 +32,45 @@ class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView>{
     private AuthUser mTargetedUser;
 
     private String existsPath;
+
+    void loadData(Consumer<List<Message>> onNewResult){
+
+    }
+
+    private void updateThePathAccordingIfExistOrNot() {
+        mMessagesDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot singleSnap : dataSnapshot.getChildren()) {
+                    String singleSnapKey = singleSnap.getKey(); // save the coming keys
+                    // check if the key contains both users keys
+                    if (checkIfPathContainsBothKeys(singleSnapKey)) {
+                        existsPath = singleSnap.getKey(); // if yes update the exists path
+                        break;
+                    }
+                }
+                if (existsPath == null) {
+                    // if the existsPath not updated specify a new one by combining the users keys
+                    existsPath = mCurrentUser.getUid() + "-" + mTargetedUser.getUid();
+                }
+                mUsersChatDbRef = FirebaseUtils.getDatabase().getReference()
+                        .child(MESSAGES_NODE_DB)
+                        .child(existsPath);  //finally looks like /messages/24L0kQx7506-2XK48YsESFaQ
+
+                retrieveAndSaveChatData();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+
+    private boolean checkIfPathContainsBothKeys(String singleKey) {
+        return !singleKey.isEmpty() && singleKey.contains(mCurrentUser.getUid())
+                && singleKey.contains(mTargetedUser.getUid());
+    }
+
 
     private void retrieveAndSaveChatData() {
         mChildListener = new ChildEventListener() {
@@ -60,6 +105,24 @@ class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView>{
             //endregion
         };
         mUsersChatDbRef.addChildEventListener(mChildListener);
+    }
+
+    public void handleSelectedImage(Uri selectedImage) {
+        // We now have an image get its uri and then send it to the storage
+
+        if (selectedImage != null) {
+            StorageReference photoRef = mStorageRef.child(selectedImage.getLastPathSegment());
+            UploadTask uploadTask = photoRef.putFile(selectedImage);
+            uploadTask.addOnSuccessListener(taskSnapshot -> {
+                if (taskSnapshot.getDownloadUrl() == null) return;
+                // The photo uploaded successfully get its url and push it to the db
+                String mImageUri = taskSnapshot.getDownloadUrl().toString();
+                Message message = new Message(mCurrentUser.getName(),
+                        null,
+                        mImageUri);
+                mUsersChatDbRef.push().setValue(message);
+            });
+        }
     }
 
 }

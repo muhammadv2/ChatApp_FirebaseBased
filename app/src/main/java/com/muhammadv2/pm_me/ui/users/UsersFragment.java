@@ -65,19 +65,7 @@ public class UsersFragment
 
     @Override
     public void loadData(boolean pullToRefresh) {
-        presenter.loadData(this::attachUI);
-    }
-
-    @Override
-    protected String getErrorMessage(Throwable e, boolean pullToRefresh) {
-        return null;
-    }
-
-    private void attachUI(List<AuthUser> authUsers) {
-        mUsersRV.setHasFixedSize(true);
-        mUsersRV.setLayoutManager(new LinearLayoutManager(getContext()));
-        mUsersAdapter = new UsersAdapter(authUsers, this);
-        mUsersRV.setAdapter(mUsersAdapter);
+        presenter.loadData(this::setData);
     }
 
     @Override
@@ -93,13 +81,16 @@ public class UsersFragment
     }
 
     @Override
-    public void navigateChatDetails(AuthUser currentUser, AuthUser targetedUser) {
-        navigator.handleOnTargetUserClicked(getContext(), currentUser, targetedUser);
+    public void navigateChatDetails(String currentUserKey, String targetedUserKey) {
+        navigator.handleOnTargetUserClicked(getContext(), currentUserKey, targetedUserKey);
     }
 
     @Override
-    public void setData(List<AuthUser> data) {
-        attachUI(data);
+    public void setData(List<AuthUser> authUsers) {
+        mUsersRV.setHasFixedSize(true);
+        mUsersRV.setLayoutManager(new LinearLayoutManager(getContext()));
+        mUsersAdapter = new UsersAdapter(authUsers, this);
+        mUsersRV.setAdapter(mUsersAdapter);
     }
 
     @Override
@@ -133,5 +124,10 @@ public class UsersFragment
     public void onDestroy() {
         super.onDestroy();
         presenter.destroy();
+    }
+
+    @Override
+    protected String getErrorMessage(Throwable e, boolean pullToRefresh) {
+        return null;
     }
 }

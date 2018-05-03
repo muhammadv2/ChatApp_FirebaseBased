@@ -8,7 +8,6 @@ import android.os.Bundle;
 import com.firebase.ui.auth.AuthUI;
 import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.ui.details.ChatDetailsActivity;
-import com.muhammadv2.pm_me.model.AuthUser;
 
 import java.util.Arrays;
 
@@ -34,11 +33,11 @@ public class Navigator {
     }
 
     public void handleOnTargetUserClicked(Context context,
-                                          AuthUser currentUser,
-                                          AuthUser targetedUser) {
+                                          String currentUserKey,
+                                          String targetedUserKey) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(TARGETED_USER_DATA, targetedUser);
-        bundle.putParcelable(CURRENT_USER_DATA, currentUser);
+        bundle.putString(TARGETED_USER_DATA, targetedUserKey);
+        bundle.putString(CURRENT_USER_DATA, currentUserKey);
 
         Intent intent = new Intent(context, ChatDetailsActivity.class);
         intent.putExtras(bundle);

@@ -28,12 +28,15 @@ import com.muhammadv2.pm_me.R;
 import com.muhammadv2.pm_me.model.Message;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
 import static android.app.Activity.RESULT_OK;
+import static com.muhammadv2.pm_me.Constants.DEFAULT_MSG_LENGTH_LIMIT;
 import static com.muhammadv2.pm_me.Constants.RC_PHOTO_PICKER;
 
 public class ChatDetailsFragment extends
@@ -50,9 +53,6 @@ public class ChatDetailsFragment extends
     EditText mMessageEditText;
     @BindView(R.id.btn_send_msg)
     Button mSendButton;
-
-    private Context mContext = getContext();
-    private Activity mActivity;
 
     public ChatDetailsFragment() {
         // Required empty public constructor
@@ -78,8 +78,6 @@ public class ChatDetailsFragment extends
         setRetainInstance(true);
         ButterKnife.bind(this, view);
         Timber.plant(new Timber.DebugTree());
-        mSendButton.setEnabled(false);
-        mActivity = getActivity();
         saveDataComingWithIntent();
 
         loadData(false);
@@ -96,42 +94,27 @@ public class ChatDetailsFragment extends
 
     @Override
     public void loadData(boolean pullToRefresh) {
-        presenter.loadData(this::attachView);
+        presenter.loadData(this::setData);
     }
 
-    private void attachView(List<Message> messages) {
+    @Override
+    public void setData(List<Message> messages) {
         mMessageRv.setHasFixedSize(true);
-        mMessageRv.setLayoutManager(new LinearLayoutManager(mContext));
+        mMessageRv.setLayoutManager(new LinearLayoutManager(getContext()));
         mMessageAdapter = new MessageAdapter(messages);
         mMessageRv.setAdapter(mMessageAdapter);
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        detachDatabaseListener();
-    }
-
     private void saveDataComingWithIntent() {
-        Intent intent = mActivity.getIntent();
+        Intent intent = Objects.requireNonNull(getActivity()).getIntent();
         Bundle bundle = intent.getExtras();
         if (bundle == null) return;
         mCurrentUser = bundle.getParcelable(Constants.CURRENT_USER_DATA);
         mTargetedUser = bundle.getParcelable(Constants.TARGETED_USER_DATA);
     }
 
-    private void detachDatabaseListener() {
-        if (mChildListener != null) {
-            mUsersChatDbRef.removeEventListener(mChildListener);
-            mChildListener = null;
-        }
-        if (mMessageAdapter != null)
-            mMessageAdapter.clear();
-    }
-
     //region View input Methods
-    public void onClick(View view) {
-
+    public void onClick() {
         mPhotoPickerButton.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/jpeg");
@@ -140,29 +123,43 @@ public class ChatDetailsFragment extends
                     (intent, "Complete action using"), RC_PHOTO_PICKER);
         });
         mSendButton.setOnClickListener(v -> {
+            String messageBody = mSendButton.getText().toString().trim();
             // Populate message model with the input from the user
-            Message message =
-                    new Message(mCurrentUser.getName(),
-                            mMessageEditText.getText().toString().trim(), // Message body
-                            null);
-
-            mUsersChatDbRef.push().setValue(message);
-            // Clear input box
-            mMessageEditText.setText("");
-
-            // Check if no view has focus:
-            View focusedView = mActivity.getCurrentFocus();
-            if (focusedView != null) {
-                InputMethodManager imm = (InputMethodManager)
-                        mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (imm != null) {
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
-            }
+            presenter.sendButtonClicked(messageBody);
+            clearInputViews();
         });
     }
 
+    private void clearInputViews() {
+        if (getActivity() == null) return;
+        // Clear input box
+        mMessageEditText.setText("");
+        // Check if no view has focus:
+        View focusedView = getActivity().getCurrentFocus();
+        if (focusedView != null) {
+            InputMethodManager imm = (InputMethodManager)
+                    getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(focusedView.getRootView().getWindowToken(), 0);
+            }
+        }
+    }
+
+    //endregion
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_PHOTO_PICKER) {
+            if (resultCode == RESULT_OK) {
+                Uri selectedImage = data.getData();
+                presenter.handleSelectedImage(selectedImage);
+            }
+        }
+    }
+
     private void editTextWatcher() {
+        mSendButton.setEnabled(false);
         // Only unable the send button when there's text to send
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -187,21 +184,10 @@ public class ChatDetailsFragment extends
                 new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
     }
 
-    //endregion
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ChatDetailsFragment.RC_PHOTO_PICKER) {
-            if (resultCode == RESULT_OK) {
-                Uri selectedImage = data.getData();
-                handleSelectedImage(selectedImage);
-            }
-        }
-    }
-
-    @Override
-    public void setData(List<Message> data) {
-
+    public void onPause() {
+        super.onPause();
+        presenter.detachListeners();
     }
 
     @Override

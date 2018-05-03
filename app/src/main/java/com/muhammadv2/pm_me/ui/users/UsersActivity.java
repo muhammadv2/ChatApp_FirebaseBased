@@ -42,7 +42,7 @@ public class UsersActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
-                // Sign-in succeeded, set up the UI
+                // Sign-in succeeded
                 Toast.makeText(this, R.string.signed_in, Toast.LENGTH_SHORT).show();
             } else if (resultCode == RESULT_CANCELED) {
                 // Sign in was canceled by the user, finish the activity

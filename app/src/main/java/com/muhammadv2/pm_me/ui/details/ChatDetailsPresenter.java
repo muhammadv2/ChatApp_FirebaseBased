@@ -7,6 +7,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.hannesdorfmann.mosby3.mvp.MvpNullObjectBasePresenter;
@@ -14,11 +15,15 @@ import com.muhammadv2.pm_me.Utils.FirebaseUtils;
 import com.muhammadv2.pm_me.model.AuthUser;
 import com.muhammadv2.pm_me.model.Message;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+
+import java9.util.function.Consumer;
+
+import static com.muhammadv2.pm_me.Constants.MESSAGES_NODE_DB;
+import static com.muhammadv2.pm_me.Constants.PHOTOS_DATA_STORAGE;
 
 class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> {
-
 
     // Fire base instances
     private DatabaseReference mUsersChatDbRef;
@@ -26,38 +31,37 @@ class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> 
     private ChildEventListener mChildListener;
     private StorageReference mStorageRef;
 
-    private List<Message> messageList; // List to hold all the messages retrieved from the db
-
     private AuthUser mCurrentUser;
     private AuthUser mTargetedUser;
 
     private String existsPath;
 
-    void loadData(Consumer<List<Message>> onNewResult){
-
+    ChatDetailsPresenter() {
+        mMessagesDbRef = FirebaseUtils.getDatabase().getReference().child(MESSAGES_NODE_DB);
+        mStorageRef = FirebaseStorage.getInstance().getReference().child(PHOTOS_DATA_STORAGE);
     }
 
-    private void updateThePathAccordingIfExistOrNot() {
+    void loadData(Consumer<List<Message>> onNewResult) {
+
         mMessagesDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot singleSnap : dataSnapshot.getChildren()) {
-                    String singleSnapKey = singleSnap.getKey(); // save the coming keys
-                    // check if the key contains both users keys
-                    if (checkIfPathContainsBothKeys(singleSnapKey)) {
-                        existsPath = singleSnap.getKey(); // if yes update the exists path
+                    if (checkIfPathContainsBothKeys(singleSnap.getKey())) {
+                        //Current users have running chat path so update it
+                        existsPath = singleSnap.getKey();
                         break;
                     }
                 }
                 if (existsPath == null) {
-                    // if the existsPath not updated specify a new one by combining the users keys
+                    //Current users never chatted before create a new path by combining they keys
                     existsPath = mCurrentUser.getUid() + "-" + mTargetedUser.getUid();
                 }
                 mUsersChatDbRef = FirebaseUtils.getDatabase().getReference()
                         .child(MESSAGES_NODE_DB)
-                        .child(existsPath);  //finally looks like /messages/24L0kQx7506-2XK48YsESFaQ
+                        .child(existsPath); //finally looks like /messages/24L0kQx7506-2XK48YsESFaQ
 
-                retrieveAndSaveChatData();
+                retrieveAndSaveChatData(onNewResult);
             }
 
             @Override
@@ -71,14 +75,13 @@ class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> 
                 && singleKey.contains(mTargetedUser.getUid());
     }
 
-
-    private void retrieveAndSaveChatData() {
+    private void retrieveAndSaveChatData(Consumer<List<Message>> onNewResult) {
+        List<Message> messages = new ArrayList<>();
         mChildListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Message message = dataSnapshot.getValue(Message.class);
-                messageList.add(message);
-                instantiateRecyclerView();
+                messages.add(message);
             }
 
             //region unused
@@ -105,6 +108,7 @@ class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> 
             //endregion
         };
         mUsersChatDbRef.addChildEventListener(mChildListener);
+        onNewResult.accept(messages);
     }
 
     public void handleSelectedImage(Uri selectedImage) {
@@ -125,4 +129,15 @@ class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> 
         }
     }
 
+    void detachListeners() {
+        if (mChildListener != null) {
+            mUsersChatDbRef.removeEventListener(mChildListener);
+            mChildListener = null;
+        }
+    }
+
+    public void sendButtonClicked(String messageBody) {
+        Message message = new Message(mCurrentUser.getName(), messageBody, null);
+        mUsersChatDbRef.push().setValue(message);
+    }
 }

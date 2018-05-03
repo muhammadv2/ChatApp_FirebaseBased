@@ -49,7 +49,7 @@ public class UsersPresenter extends MvpNullObjectBasePresenter<IUsersView> {
     }
 
     public void onTargetUserClicked(int position) {
-        getView().navigateChatDetails(mCurrentUser, mAuthUsers.get(position));
+        getView().navigateChatDetails(mCurrentUser.getUid(), mAuthUsers.get(position).getUid());
     }
 
     /**
@@ -90,7 +90,8 @@ public class UsersPresenter extends MvpNullObjectBasePresenter<IUsersView> {
                     } else {
                         mCurrentUser = singleChild.getValue(AuthUser.class);
                         mCurrentUser.setUid(singleChild.getKey());
-                        getView().showCurrentUserInfo(mCurrentUser.getName(), mCurrentUser.getImageUrl());
+                        getView().showCurrentUserInfo
+                                (mCurrentUser.getName(), mCurrentUser.getImageUrl());
                     }
                 }
                 onNewResult.accept(mAuthUsers);

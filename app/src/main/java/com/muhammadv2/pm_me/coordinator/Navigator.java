@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import com.firebase.ui.auth.AuthUI;
 import com.muhammadv2.pm_me.R;
+import com.muhammadv2.pm_me.model.AuthUser;
 import com.muhammadv2.pm_me.ui.details.ChatDetailsActivity;
 
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import static com.muhammadv2.pm_me.Constants.TARGETED_USER_DATA;
 
 public class Navigator {
 
+    //region UsersComponent Methods
     public void handleOpeningAuthSign(Activity context) {
         context.startActivityForResult(
                 AuthUI.getInstance()
@@ -33,14 +35,16 @@ public class Navigator {
     }
 
     public void handleOnTargetUserClicked(Context context,
-                                          String currentUserKey,
-                                          String targetedUserKey) {
+                                          AuthUser currentUser,
+                                          AuthUser targetedUser) {
         Bundle bundle = new Bundle();
-        bundle.putString(TARGETED_USER_DATA, targetedUserKey);
-        bundle.putString(CURRENT_USER_DATA, currentUserKey);
+        bundle.putParcelable(CURRENT_USER_DATA, currentUser);
+        bundle.putParcelable(TARGETED_USER_DATA, targetedUser);
 
         Intent intent = new Intent(context, ChatDetailsActivity.class);
         intent.putExtras(bundle);
         context.startActivity(intent);
     }
+
+    //endregion
 }

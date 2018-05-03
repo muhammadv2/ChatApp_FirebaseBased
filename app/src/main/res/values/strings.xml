@@ -13,8 +13,6 @@
     <string name="empty_screen">empty screen</string>
     <string name="empty_screen_text">Break the ice by telling a joke\n A bad one!</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="signed_in">Signed in!</string>
     <string name="sign_in_cancelled">Sign in canceled</string>
 </resources>

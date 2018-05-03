@@ -71,8 +71,8 @@ public class UsersFragment
     @Override
     public void onResume() {
         super.onResume();
-        presenter.setAuthStateListener();
         presenter.attachView(this);
+        presenter.setAuthStateListener();
     }
 
     @Override
@@ -81,8 +81,8 @@ public class UsersFragment
     }
 
     @Override
-    public void navigateChatDetails(String currentUserKey, String targetedUserKey) {
-        navigator.handleOnTargetUserClicked(getContext(), currentUserKey, targetedUserKey);
+    public void navigateChatDetails(AuthUser currentUser, AuthUser targetUser) {
+        navigator.handleOnTargetUserClicked(getContext(), currentUser, targetUser);
     }
 
     @Override

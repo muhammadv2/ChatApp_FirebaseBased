@@ -1,7 +1,6 @@
 package com.muhammadv2.pm_me.ui.details;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -25,11 +24,11 @@ import android.widget.ImageButton;
 import com.hannesdorfmann.mosby3.mvp.lce.MvpLceFragment;
 import com.muhammadv2.pm_me.Constants;
 import com.muhammadv2.pm_me.R;
+import com.muhammadv2.pm_me.model.AuthUser;
 import com.muhammadv2.pm_me.model.Message;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,8 +44,6 @@ public class ChatDetailsFragment extends
 
     @BindView(R.id.rv_messages_container)
     RecyclerView mMessageRv;
-    MessageAdapter mMessageAdapter;
-
     @BindView(R.id.btn_select_image)
     ImageButton mPhotoPickerButton;
     @BindView(R.id.et_user_input)
@@ -54,16 +51,12 @@ public class ChatDetailsFragment extends
     @BindView(R.id.btn_send_msg)
     Button mSendButton;
 
+    AuthUser currentUser;
+    AuthUser targetUser;
+
     public ChatDetailsFragment() {
         // Required empty public constructor
     }
-
-    @NonNull
-    @Override
-    public ChatDetailsPresenter createPresenter() {
-        return new ChatDetailsPresenter();
-    }
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -78,56 +71,69 @@ public class ChatDetailsFragment extends
         setRetainInstance(true);
         ButterKnife.bind(this, view);
         Timber.plant(new Timber.DebugTree());
-        saveDataComingWithIntent();
-
+        mSendButton.setEnabled(false);
+        handleComingIntentData();
         loadData(false);
-
         // Set some restrictions over the user input
         editTextWatcher();
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         presenter.attachView(this);
+    }
+
+    @NonNull
+    @Override
+    public ChatDetailsPresenter createPresenter() {
+        Timber.d("Create presenter called ");
+        return new ChatDetailsPresenter();
+    }
+
+    private void handleComingIntentData() {
+        Timber.d("handle intent");
+        Intent intent = Objects.requireNonNull(getActivity()).getIntent();
+        Bundle bundle = intent.getExtras();
+        if (bundle == null) return;
+        currentUser = bundle.getParcelable(Constants.CURRENT_USER_DATA);
+        targetUser = bundle.getParcelable(Constants.TARGETED_USER_DATA);
     }
 
     @Override
     public void loadData(boolean pullToRefresh) {
-        presenter.loadData(this::setData);
+        Timber.d("load data called");
+        presenter.loadData(this::setData, currentUser, targetUser);
     }
 
     @Override
     public void setData(List<Message> messages) {
+        Timber.d("setData %s", messages.size());
         mMessageRv.setHasFixedSize(true);
         mMessageRv.setLayoutManager(new LinearLayoutManager(getContext()));
-        mMessageAdapter = new MessageAdapter(messages);
-        mMessageRv.setAdapter(mMessageAdapter);
-    }
-
-    private void saveDataComingWithIntent() {
-        Intent intent = Objects.requireNonNull(getActivity()).getIntent();
-        Bundle bundle = intent.getExtras();
-        if (bundle == null) return;
-        mCurrentUser = bundle.getParcelable(Constants.CURRENT_USER_DATA);
-        mTargetedUser = bundle.getParcelable(Constants.TARGETED_USER_DATA);
+        MessageAdapter messageAdapter = new MessageAdapter(messages);
+        mMessageRv.setAdapter(messageAdapter);
     }
 
     //region View input Methods
     public void onClick() {
-        mPhotoPickerButton.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/jpeg");
-            intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-            startActivityForResult(Intent.createChooser
-                    (intent, "Complete action using"), RC_PHOTO_PICKER);
-        });
-        mSendButton.setOnClickListener(v -> {
-            String messageBody = mSendButton.getText().toString().trim();
-            // Populate message model with the input from the user
-            presenter.sendButtonClicked(messageBody);
-            clearInputViews();
-        });
+        mPhotoPickerButton.setOnClickListener(v -> onPhotoPickerClicked());
+        mSendButton.setOnClickListener(v -> onSendButtonClicked());
+    }
+
+    private void onSendButtonClicked() {
+        String messageBody = mSendButton.getText().toString().trim();
+        // Populate message model with the input from the user
+        presenter.sendButtonClicked(messageBody);
+        clearInputViews();
+    }
+
+    private void onPhotoPickerClicked() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/jpeg");
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+        startActivityForResult(Intent.createChooser
+                (intent, "Complete action using"), RC_PHOTO_PICKER);
     }
 
     private void clearInputViews() {
@@ -145,21 +151,7 @@ public class ChatDetailsFragment extends
         }
     }
 
-    //endregion
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_PHOTO_PICKER) {
-            if (resultCode == RESULT_OK) {
-                Uri selectedImage = data.getData();
-                presenter.handleSelectedImage(selectedImage);
-            }
-        }
-    }
-
     private void editTextWatcher() {
-        mSendButton.setEnabled(false);
         // Only unable the send button when there's text to send
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -182,6 +174,18 @@ public class ChatDetailsFragment extends
         // Set maximum length for a single message not exceed 1000.
         mMessageEditText.setFilters(new InputFilter[]{
                 new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
+    }
+    //endregion
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_PHOTO_PICKER) {
+            if (resultCode == RESULT_OK) {
+                Uri selectedImage = data.getData();
+                presenter.handleSelectedImage(selectedImage);
+            }
+        }
     }
 
     @Override

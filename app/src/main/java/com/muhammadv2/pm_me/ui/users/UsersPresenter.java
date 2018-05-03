@@ -49,7 +49,7 @@ public class UsersPresenter extends MvpNullObjectBasePresenter<IUsersView> {
     }
 
     public void onTargetUserClicked(int position) {
-        getView().navigateChatDetails(mCurrentUser.getUid(), mAuthUsers.get(position).getUid());
+        getView().navigateChatDetails(mCurrentUser, mAuthUsers.get(position));
     }
 
     /**

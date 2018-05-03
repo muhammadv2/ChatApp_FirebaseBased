@@ -6,6 +6,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
 import com.muhammadv2.pm_me.R;
+import com.muhammadv2.pm_me.model.AuthUser;
 
 import static com.muhammadv2.pm_me.Constants.TARGETED_USER_DATA;
 
@@ -20,9 +21,9 @@ public class ChatDetailsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         Bundle bundle = getIntent().getExtras();
         if (actionBar != null && bundle != null) {
-            String authUser = bundle.getString(TARGETED_USER_DATA);
+            AuthUser authUser = bundle.getParcelable(TARGETED_USER_DATA);
             if (authUser == null) return;
-            actionBar.setTitle(authUser);
+            actionBar.setTitle(authUser.getName());
         }
     }
 

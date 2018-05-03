@@ -113,20 +113,20 @@ class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> 
             //endregion
         };
         mUsersChatDbRef.addChildEventListener(mChildListener);
-
-        Timber.plant(new Timber.DebugTree());
-        Timber.d("list not empty %s", messages.size());
     }
 
     public void handleSelectedImage(Uri selectedImage) {
+        Timber.plant(new Timber.DebugTree());
         // We now have an image get its uri and then send it to the storage
         if (selectedImage != null) {
             StorageReference photoRef = mStorageRef.child(selectedImage.getLastPathSegment());
             UploadTask uploadTask = photoRef.putFile(selectedImage);
+
             uploadTask.addOnSuccessListener(taskSnapshot -> {
-                if (taskSnapshot.getMetadata() == null) return;
+                if (taskSnapshot.getDownloadUrl() == null) return;
                 // The photo uploaded successfully get its url and push it to the db
-                String mImageUri = taskSnapshot.getMetadata().toString();
+                String mImageUri = taskSnapshot.getDownloadUrl().toString();
+                Timber.d("image url %s", mImageUri);
                 Message message = new Message(currentUser.getName(),
                         null,
                         mImageUri);
@@ -135,15 +135,14 @@ class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> 
         }
     }
 
-    void detachListeners() {
-        if (mChildListener != null) {
-            mUsersChatDbRef.removeEventListener(mChildListener);
-            mChildListener = null;
-        }
-    }
-
     public void sendButtonClicked(String messageBody) {
         Message message = new Message(currentUser.getName(), messageBody, null);
         mUsersChatDbRef.push().setValue(message);
+    }
+
+    void detachListeners() {
+        if (mChildListener == null) return;
+        mUsersChatDbRef.removeEventListener(mChildListener);
+        mChildListener = null;
     }
 }

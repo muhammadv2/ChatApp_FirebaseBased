@@ -126,7 +126,7 @@ public class ChatDetailsFragment extends
 
     private void onPhotoPickerClicked() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/jpeg");
+        intent.setType(getString(R.string.img));
         intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
         startActivityForResult(Intent.createChooser
                 (intent, getString(R.string.image_picker)), RC_PHOTO_PICKER);
@@ -185,8 +185,8 @@ public class ChatDetailsFragment extends
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onDestroy() {
+        super.onDestroy();
         presenter.detachListeners();
     }
 

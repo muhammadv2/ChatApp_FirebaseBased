@@ -87,7 +87,6 @@ class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> 
                 Message message = dataSnapshot.getValue(Message.class);
                 messages.add(message);
                 onNewResult.accept(messages);
-                Timber.d("message %s", message.getSenderName());
             }
 
             //region unused
@@ -121,14 +120,13 @@ class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> 
 
     public void handleSelectedImage(Uri selectedImage) {
         // We now have an image get its uri and then send it to the storage
-
         if (selectedImage != null) {
             StorageReference photoRef = mStorageRef.child(selectedImage.getLastPathSegment());
             UploadTask uploadTask = photoRef.putFile(selectedImage);
             uploadTask.addOnSuccessListener(taskSnapshot -> {
-                if (taskSnapshot.getDownloadUrl() == null) return;
+                if (taskSnapshot.getMetadata() == null) return;
                 // The photo uploaded successfully get its url and push it to the db
-                String mImageUri = taskSnapshot.getDownloadUrl().toString();
+                String mImageUri = taskSnapshot.getMetadata().toString();
                 Message message = new Message(currentUser.getName(),
                         null,
                         mImageUri);

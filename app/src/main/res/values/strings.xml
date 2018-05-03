@@ -15,4 +15,5 @@
 
     <string name="signed_in">Signed in!</string>
     <string name="sign_in_cancelled">Sign in canceled</string>
+    <string name="image_picker">Complete action using</string>
 </resources>

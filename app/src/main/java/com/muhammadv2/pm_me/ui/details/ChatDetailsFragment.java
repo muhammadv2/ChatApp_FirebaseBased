@@ -71,7 +71,11 @@ public class ChatDetailsFragment extends
         setRetainInstance(true);
         ButterKnife.bind(this, view);
         Timber.plant(new Timber.DebugTree());
+
         mSendButton.setEnabled(false);
+        mPhotoPickerButton.setOnClickListener(v -> onPhotoPickerClicked());
+        mSendButton.setOnClickListener(v -> onSendButtonClicked());
+
         handleComingIntentData();
         loadData(false);
         // Set some restrictions over the user input
@@ -87,12 +91,10 @@ public class ChatDetailsFragment extends
     @NonNull
     @Override
     public ChatDetailsPresenter createPresenter() {
-        Timber.d("Create presenter called ");
         return new ChatDetailsPresenter();
     }
 
     private void handleComingIntentData() {
-        Timber.d("handle intent");
         Intent intent = Objects.requireNonNull(getActivity()).getIntent();
         Bundle bundle = intent.getExtras();
         if (bundle == null) return;
@@ -102,13 +104,11 @@ public class ChatDetailsFragment extends
 
     @Override
     public void loadData(boolean pullToRefresh) {
-        Timber.d("load data called");
         presenter.loadData(this::setData, currentUser, targetUser);
     }
 
     @Override
     public void setData(List<Message> messages) {
-        Timber.d("setData %s", messages.size());
         mMessageRv.setHasFixedSize(true);
         mMessageRv.setLayoutManager(new LinearLayoutManager(getContext()));
         MessageAdapter messageAdapter = new MessageAdapter(messages);
@@ -116,13 +116,9 @@ public class ChatDetailsFragment extends
     }
 
     //region View input Methods
-    public void onClick() {
-        mPhotoPickerButton.setOnClickListener(v -> onPhotoPickerClicked());
-        mSendButton.setOnClickListener(v -> onSendButtonClicked());
-    }
 
     private void onSendButtonClicked() {
-        String messageBody = mSendButton.getText().toString().trim();
+        String messageBody = mMessageEditText.getText().toString().trim();
         // Populate message model with the input from the user
         presenter.sendButtonClicked(messageBody);
         clearInputViews();
@@ -133,7 +129,7 @@ public class ChatDetailsFragment extends
         intent.setType("image/jpeg");
         intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
         startActivityForResult(Intent.createChooser
-                (intent, "Complete action using"), RC_PHOTO_PICKER);
+                (intent, getString(R.string.image_picker)), RC_PHOTO_PICKER);
     }
 
     private void clearInputViews() {

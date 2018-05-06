@@ -110,7 +110,9 @@ public class ChatDetailsFragment extends
     @Override
     public void setData(List<Message> messages) {
         mMessageRv.setHasFixedSize(true);
-        mMessageRv.setLayoutManager(new LinearLayoutManager(getContext()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        mMessageRv.setLayoutManager(linearLayoutManager);
+        linearLayoutManager.setStackFromEnd(true);
         MessageAdapter messageAdapter = new MessageAdapter(messages);
         mMessageRv.setAdapter(messageAdapter);
     }

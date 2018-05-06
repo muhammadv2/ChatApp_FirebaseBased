@@ -26,6 +26,9 @@ import static com.muhammadv2.pm_me.Constants.PHOTOS_DATA_STORAGE;
 
 class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> {
 
+    //Technical
+    //Todo After image being selected show process bar until it shown
+
     private AuthUser currentUser;
     private AuthUser targetUser;
 
@@ -121,12 +124,13 @@ class ChatDetailsPresenter extends MvpNullObjectBasePresenter<IChatDetailsView> 
         if (selectedImage != null) {
             StorageReference photoRef = mStorageRef.child(selectedImage.getLastPathSegment());
             UploadTask uploadTask = photoRef.putFile(selectedImage);
+            mStorageRef.getDownloadUrl();
 
             uploadTask.addOnSuccessListener(taskSnapshot -> {
                 if (taskSnapshot.getDownloadUrl() == null) return;
                 // The photo uploaded successfully get its url and push it to the db
                 String mImageUri = taskSnapshot.getDownloadUrl().toString();
-                Timber.d("image url %s", mImageUri);
+                Timber.d("image url %s", taskSnapshot.getStorage().getDownloadUrl());//!!!!!!!
                 Message message = new Message(currentUser.getName(),
                         null,
                         mImageUri);
